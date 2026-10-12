@@ -4,19 +4,21 @@ version = "0.1.0"
 description = "KHelp: a cited SATS triage-priority assistant for outpatient triage desks"
 requires-python = ">=3.11"
 license = "Apache-2.0"
-dependencies = ["khelp-scoring"]
+dependencies = ["khelp-scoring", "khelp-db", "khelp-triage-tools"]
 
 [tool.uv]
 package = false
 
 [tool.uv.workspace]
-members = ["packages/scoring"]
+members = ["packages/scoring", "packages/db", "packages/mcp-triage-tools"]
 
 [tool.uv.sources]
 khelp-scoring = { workspace = true }
+khelp-db = { workspace = true }
+khelp-triage-tools = { workspace = true }
 
 [dependency-groups]
 dev = ["pytest>=8"]
 
 [tool.pytest.ini_options]
-testpaths = ["packages/scoring/tests"]
+testpaths = ["packages/scoring/tests", "packages/mcp-triage-tools/tests"]
