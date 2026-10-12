@@ -1,0 +1,198 @@
+# SATS adult emergency signs ("discriminators") — DRAFT, unverified.
+#
+# Matching is deterministic keyword/phrase matching on a normalised note
+# (lowercase, hyphens -> spaces, whole-word matches). A phrase preceded in
+# the same clause by a negation cue ("no", "denies", ...) is reported as
+# negated and does not count towards priority.
+#
+# Entries either list `phrases` (any one matches) or `all_of` (every named
+# phrase set must match). Nigerian Pidgin phrases are drafts and need review
+# by a Pidgin-speaking nurse.
+
+negation_cues: ["no", "not", "denies", "denied", "without", "nil", "never", "negative for"]
+
+phrase_sets:
+  pregnancy: ["pregnant", "pregnancy", "weeks gestation", "get belle", "carrying belle", "antenatal", "anc"]
+  abdominal_pain: ["abdominal pain", "abdo pain", "lower abdominal pain", "stomach pain", "belle pain", "belle dey pain", "belle dey pain me", "pv bleeding", "vaginal bleeding"]
+  trauma: ["fell", "fall", "rta", "road traffic accident", "accident", "beaten", "assaulted", "hit by"]
+
+discriminators:
+  # ---------------------------------------------------------------- RED
+  - id: disc.red.airway
+    name: Airway compromised
+    priority: RED
+    phrases: ["airway compromised", "airway obstructed", "choking", "stridor"]
+    source: { document: SATS Training Manual, edition: "2012 (confirm)", location: "Adult emergency signs, RED (page TODO)" }
+    verified: false
+  - id: disc.red.not_breathing
+    name: Breathing absent
+    priority: RED
+    phrases: ["not breathing", "stopped breathing", "apnoea", "apnea", "no dey breathe"]
+    source: { document: SATS Training Manual, edition: "2012 (confirm)", location: "Adult emergency signs, RED (page TODO)" }
+    verified: false
+  - id: disc.red.cardiac_arrest
+    name: Cardiac arrest
+    priority: RED
+    phrases: ["cardiac arrest", "no pulse", "pulseless"]
+    source: { document: SATS Training Manual, edition: "2012 (confirm)", location: "Adult emergency signs, RED (page TODO)" }
+    verified: false
+  - id: disc.red.seizure_current
+    name: Seizure — current
+    priority: RED
+    phrases: ["seizing", "actively seizing", "convulsing", "still convulsing", "fitting", "actively fitting", "dey convulse", "dey jerk"]
+    source: { document: SATS Training Manual, edition: "2012 (confirm)", location: "Adult emergency signs, RED (page TODO)" }
+    verified: false
+  - id: disc.red.burn_face_inhalation
+    name: Burn — facial or inhalation
+    priority: RED
+    phrases: ["facial burn", "burn to face", "burns to face", "inhalation burn", "smoke inhalation"]
+    source: { document: SATS Training Manual, edition: "2012 (confirm)", location: "Adult emergency signs, RED (page TODO)" }
+    verified: false
+  - id: disc.red.hypoglycaemia
+    name: Hypoglycaemia
+    priority: RED
+    phrases: ["hypoglycaemia", "hypoglycemia", "hypoglycaemic", "hypoglycemic", "low sugar", "sugar low", "sugar don drop"]
+    source: { document: SATS Training Manual, edition: "2012 (confirm)", location: "Adult emergency signs, RED (page TODO)" }
+    verified: false
+
+  # ---------------------------------------------------------------- ORANGE
+  - id: disc.orange.sob_acute
+    name: Shortness of breath — acute
+    priority: ORANGE
+    phrases: ["shortness of breath", "short of breath", "sob", "difficulty in breathing", "difficulty breathing", "dib", "breathless", "breathlessness", "cannot breathe", "can't breathe", "cant breathe", "no fit breathe", "breath dey cut", "breath dey hard"]
+    source: { document: SATS Training Manual, edition: "2012 (confirm)", location: "Adult emergency signs, ORANGE (page TODO)" }
+    verified: false
+  - id: disc.orange.haemoptysis
+    name: Coughing blood
+    priority: ORANGE
+    phrases: ["coughing blood", "coughed blood", "coughing up blood", "haemoptysis", "hemoptysis", "dey cough blood"]
+    source: { document: SATS Training Manual, edition: "2012 (confirm)", location: "Adult emergency signs, ORANGE (page TODO)" }
+    verified: false
+  - id: disc.orange.chest_pain
+    name: Chest pain
+    priority: ORANGE
+    phrases: ["chest pain", "chest pains", "chest tightness", "chest dey pain", "chest dey pain me", "pain for chest"]
+    source: { document: SATS Training Manual, edition: "2012 (confirm)", location: "Adult emergency signs, ORANGE (page TODO)" }
+    verified: false
+  - id: disc.orange.haemorrhage_uncontrolled
+    name: Haemorrhage — uncontrolled
+    priority: ORANGE
+    phrases: ["uncontrolled bleeding", "bleeding heavily", "heavy bleeding", "bleeding profusely", "blood no gree stop", "blood no stop"]
+    source: { document: SATS Training Manual, edition: "2012 (confirm)", location: "Adult emergency signs, ORANGE (page TODO)" }
+    verified: false
+  - id: disc.orange.seizure_post_ictal
+    name: Seizure — post-ictal
+    priority: ORANGE
+    phrases: ["post ictal", "postictal", "had a seizure", "had seizure", "had convulsion", "had a convulsion", "convulsed", "after convulsion"]
+    source: { document: SATS Training Manual, edition: "2012 (confirm)", location: "Adult emergency signs, ORANGE (page TODO)" }
+    verified: false
+  - id: disc.orange.focal_neurology
+    name: Focal neurology — acute
+    priority: ORANGE
+    phrases: ["one sided weakness", "weakness of one side", "one side weakness", "slurred speech", "facial droop", "face don twist", "hemiparesis", "one side no dey work"]
+    source: { document: SATS Training Manual, edition: "2012 (confirm)", location: "Adult emergency signs, ORANGE (page TODO)" }
+    verified: false
+  - id: disc.orange.reduced_consciousness
+    name: Level of consciousness reduced
+    priority: ORANGE
+    phrases: ["drowsy", "unconscious", "not responding", "no dey respond", "collapsed", "loss of consciousness", "loc", "fainted", "passed out"]
+    source: { document: SATS Training Manual, edition: "2012 (confirm)", location: "Adult emergency signs, ORANGE (page TODO)" }
+    verified: false
+  - id: disc.orange.aggression
+    name: Psychosis / aggression
+    priority: ORANGE
+    phrases: ["aggressive", "violent", "psychotic", "hallucinating", "dey see things"]
+    source: { document: SATS Training Manual, edition: "2012 (confirm)", location: "Adult emergency signs, ORANGE (page TODO)" }
+    verified: false
+  - id: disc.orange.threatened_limb
+    name: Threatened limb
+    priority: ORANGE
+    phrases: ["threatened limb", "pulseless limb", "limb cold and pale", "cold pale leg", "cold pale arm"]
+    source: { document: SATS Training Manual, edition: "2012 (confirm)", location: "Adult emergency signs, ORANGE (page TODO)" }
+    verified: false
+  - id: disc.orange.fracture_compound
+    name: Fracture — compound
+    priority: ORANGE
+    phrases: ["open fracture", "compound fracture", "bone sticking out", "bone dey show"]
+    source: { document: SATS Training Manual, edition: "2012 (confirm)", location: "Adult emergency signs, ORANGE (page TODO)" }
+    verified: false
+  - id: disc.orange.dislocation
+    name: Dislocation of larger joint
+    priority: ORANGE
+    phrases: ["dislocated shoulder", "dislocated hip", "dislocated knee", "dislocated elbow", "dislocation"]
+    source: { document: SATS Training Manual, edition: "2012 (confirm)", location: "Adult emergency signs, ORANGE (page TODO)" }
+    verified: false
+  - id: disc.orange.burn_major
+    name: Burn — over 20%, electrical, chemical or circumferential
+    priority: ORANGE
+    phrases: ["extensive burn", "extensive burns", "electrical burn", "electrocuted", "chemical burn", "circumferential burn"]
+    source: { document: SATS Training Manual, edition: "2012 (confirm)", location: "Adult emergency signs, ORANGE (page TODO)" }
+    verified: false
+  - id: disc.orange.poisoning
+    name: Poisoning / overdose
+    priority: ORANGE
+    phrases: ["overdose", "poisoning", "drank poison", "ingested poison", "took poison", "drank sniper", "drink sniper", "otapiapia", "rat poison", "drank kerosene"]
+    source: { document: SATS Training Manual, edition: "2012 (confirm)", location: "Adult emergency signs, ORANGE (page TODO)" }
+    verified: false
+  - id: disc.orange.vomiting_blood
+    name: Vomiting fresh blood
+    priority: ORANGE
+    phrases: ["vomiting blood", "vomited blood", "vomits blood", "haematemesis", "hematemesis", "dey vomit blood"]
+    source: { document: SATS Training Manual, edition: "2012 (confirm)", location: "Adult emergency signs, ORANGE (page TODO)" }
+    verified: false
+  - id: disc.orange.pregnancy_abdominal
+    name: Pregnancy with abdominal pain or trauma
+    priority: ORANGE
+    all_of: [pregnancy, abdominal_pain]
+    source: { document: SATS Training Manual, edition: "2012 (confirm)", location: "Adult emergency signs, ORANGE (page TODO)" }
+    verified: false
+  - id: disc.orange.pain_severe
+    name: Pain — severe
+    priority: ORANGE
+    phrases: ["severe pain", "excruciating", "8/10", "9/10", "10/10", "pain dey kill me"]
+    source: { document: SATS Training Manual, edition: "2012 (confirm)", location: "Adult emergency signs, ORANGE (page TODO)" }
+    verified: false
+
+  # ---------------------------------------------------------------- YELLOW
+  - id: disc.yellow.haemorrhage_controlled
+    name: Haemorrhage — controlled
+    priority: YELLOW
+    phrases: ["bleeding controlled", "bleeding stopped", "minor bleeding"]
+    source: { document: SATS Training Manual, edition: "2012 (confirm)", location: "Adult emergency signs, YELLOW (page TODO)" }
+    verified: false
+  - id: disc.yellow.fracture_closed
+    name: Fracture — closed
+    priority: YELLOW
+    phrases: ["closed fracture", "suspected fracture", "deformity", "deformed"]
+    source: { document: SATS Training Manual, edition: "2012 (confirm)", location: "Adult emergency signs, YELLOW (page TODO)" }
+    verified: false
+  - id: disc.yellow.burn_other
+    name: Burn — other
+    priority: YELLOW
+    phrases: ["burn", "burns", "scald", "scalded"]
+    source: { document: SATS Training Manual, edition: "2012 (confirm)", location: "Adult emergency signs, YELLOW (page TODO)" }
+    verified: false
+  - id: disc.yellow.abdominal_pain
+    name: Abdominal pain
+    priority: YELLOW
+    phrases: ["abdominal pain", "abdo pain", "stomach pain", "tummy pain", "epigastric pain", "belle pain", "belle dey pain", "belle dey pain me"]
+    source: { document: SATS Training Manual, edition: "2012 (confirm)", location: "Adult emergency signs, YELLOW (page TODO)" }
+    verified: false
+  - id: disc.yellow.vomiting_persistent
+    name: Vomiting — persistent
+    priority: YELLOW
+    phrases: ["persistent vomiting", "vomiting persistently", "vomiting everything", "cannot keep anything down", "dey vomit everything"]
+    source: { document: SATS Training Manual, edition: "2012 (confirm)", location: "Adult emergency signs, YELLOW (page TODO)" }
+    verified: false
+  - id: disc.yellow.pregnancy_trauma
+    name: Pregnancy with trauma
+    priority: YELLOW
+    all_of: [pregnancy, trauma]
+    source: { document: SATS Training Manual, edition: "2012 (confirm)", location: "Adult emergency signs, YELLOW (page TODO)" }
+    verified: false
+  - id: disc.yellow.pain_moderate
+    name: Pain — moderate
+    priority: YELLOW
+    phrases: ["moderate pain", "5/10", "6/10", "7/10"]
+    source: { document: SATS Training Manual, edition: "2012 (confirm)", location: "Adult emergency signs, YELLOW (page TODO)" }
+    verified: false

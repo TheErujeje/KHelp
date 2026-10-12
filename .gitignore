@@ -1,0 +1,43 @@
+# Python
+__pycache__/
+*.py[cod]
+.venv/
+.pytest_cache/
+.ruff_cache/
+.mypy_cache/
+*.egg-info/
+build/
+dist/
+
+# Node / web
+node_modules/
+apps/web/dist/
+
+# Environment
+.env
+.env.*
+!.env.example
+
+# Reference material (copyrighted manuals stay local; cite page/table in sats/*.yaml instead)
+docs/reference/*
+!docs/reference/.gitkeep
+
+# Runtime data
+data/intake/*.txt
+!data/intake/.gitkeep
+
+# Editor / tool-specific
+.vscode/
+.idea/
+.DS_Store
+.claude/
+CLAUDE.md
+.cursor/
+.cursorrules
+.windsurf/
+.windsurfrules
+.aider*
+.continue/
+.github/copilot-instructions.md
+AGENTS.md
+GEMINI.md

@@ -1,0 +1,22 @@
+# TEWS total -> SATS priority — DRAFT, unverified.
+# Ranges are inclusive. The final priority is the higher of the TEWS priority
+# and the highest cited discriminator priority.
+
+order: [GREEN, YELLOW, ORANGE, RED]   # lowest to highest urgency
+
+tews_to_priority:
+  - { id: prio.tews.green,  min: 0, max: 2,    priority: GREEN,  source: { document: SATS Training Manual, edition: "2012 (confirm)", location: "TEWS to priority table (page TODO)" }, verified: false }
+  - { id: prio.tews.yellow, min: 3, max: 4,    priority: YELLOW, source: { document: SATS Training Manual, edition: "2012 (confirm)", location: "TEWS to priority table (page TODO)" }, verified: false }
+  - { id: prio.tews.orange, min: 5, max: 6,    priority: ORANGE, source: { document: SATS Training Manual, edition: "2012 (confirm)", location: "TEWS to priority table (page TODO)" }, verified: false }
+  - { id: prio.tews.red,    min: 7, max: null, priority: RED,    source: { document: SATS Training Manual, edition: "2012 (confirm)", location: "TEWS to priority table (page TODO)" }, verified: false }
+
+# Project rule, not SATS: how missing or implausible TEWS inputs are handled.
+# Each missing input is bounded by its lowest and highest points. If the
+# priority is the same at both bounds it is proposed; if the lower bound is
+# already at or above `propose_with_missing_at_or_above`, that priority is
+# proposed AND a re-check is raised; otherwise only a re-check is raised.
+missing_inputs:
+  id: prio.missing_inputs
+  propose_with_missing_at_or_above: ORANGE
+  source: { document: KHelp project rule, edition: "n/a", location: "README: Missing vitals" }
+  verified: false
