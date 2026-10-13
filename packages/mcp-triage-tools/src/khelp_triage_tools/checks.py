@@ -38,8 +38,14 @@ FORBIDDEN_RATIONALE = (
     (re.compile(r"\bprescri", re.I), "prescribing"),
     (re.compile(r"\badminister", re.I), "treatment"),
     (re.compile(r"\b(treat|start|commence)\w*\s+(with|on)\b", re.I), "treatment"),
-    (re.compile(r"\b(likely|probably|most likely|suggestive of|consistent with|diagnosis (is|of))\b", re.I),
+    (re.compile(r"\b(likely|probabl[ey]|possibl[ey]|suspect\w*|suggest\w*|indicat\w*|consistent with|"
+                r"diagnos[ie]s (is|of)|due to|caused by|rule out)\b", re.I),
      "diagnostic language"),
+    # Naming a condition is a diagnosis, whatever the phrasing.
+    (re.compile(r"\b(cardiac|heart attack|myocardial|angina|malaria|typhoid|sepsis|septic|infection|pneumonia|"
+                r"stroke|asthma|diabetic|hypertensi\w*|appendicitis|ectopic|meningitis|cholera|ulcer|"
+                r"tuberculosis|tb|covid|hiv)\b", re.I),
+     "condition name"),
 )
 
 MAX_RATIONALE = 1500

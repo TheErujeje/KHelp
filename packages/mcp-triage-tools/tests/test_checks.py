@@ -59,6 +59,10 @@ def test_invented_age_is_rejected():
 def test_diagnostic_or_treatment_rationale_is_rejected():
     assert "NOT_SCORING_LANGUAGE" in codes(propose(rationale="Most likely a heart attack."))
     assert "NOT_SCORING_LANGUAGE" in codes(propose(rationale="ORANGE; give aspirin 300 mg."))
+    # Seen in a real qwen2.5:3b run:
+    assert "NOT_SCORING_LANGUAGE" in codes(propose(
+        rationale="Heart rate 118 and systolic 150, indicating possible cardiac issues."))
+    assert "NOT_SCORING_LANGUAGE" in codes(propose(rationale="ORANGE: chest pain, query malaria."))
 
 
 def test_missing_vitals_low_risk_must_recheck_instead():

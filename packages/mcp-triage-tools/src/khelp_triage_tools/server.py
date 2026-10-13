@@ -133,9 +133,11 @@ def compute_tews(vitals: dict[str, Any]) -> dict[str, Any]:
 def propose_priority(
     patient_id: int,
     priority: str,
-    vitals: dict[str, Any],
-    discriminator_ids: list[str],
-    rationale: str,
+    # Defaults let a missing argument reach the server checks, which explain
+    # how to fix it; an empty value is still rejected.
+    vitals: dict[str, Any] | None = None,
+    discriminator_ids: list[str] | None = None,
+    rationale: str = "",
     age_years: float | None = None,
 ) -> dict[str, Any]:
     """Propose a SATS priority for a named clinician to approve. Does NOT change the queue.
@@ -161,13 +163,13 @@ def propose_priority(
             return _fail("PATIENT_NOT_WAITING", f"patient {patient_id} is {patient.status}",
                          "Only waiting patients can be scored.")
         note = data.notes_for_patient(s, patient_id)
-        result = check_proposal(priority=priority, vitals=vitals, age_years=age_years,
-                                discriminator_ids=discriminator_ids, rationale=rationale, note=note)
+        result = check_proposal(priority=priority, vitals=vitals or {}, age_years=age_years,
+                                discriminator_ids=discriminator_ids or [], rationale=rationale, note=note)
         if not result.ok:
             return {"ok": False, "errors": result.errors, "server_decision": result.decision}
 
         decision = result.decision
-        reading = data.insert_vitals(s, patient_id, vitals, result.tews)
+        reading = data.insert_vitals(s, patient_id, vitals or {}, result.tews)
         needs_recheck = decision["outcome"] == "PROPOSE_AND_RECHECK"
         proposal = data.insert_proposal(
             s, patient_id=patient_id, priority=decision["priority"], citations=result.citations,
