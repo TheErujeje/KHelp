@@ -12,6 +12,17 @@ Hard rules:
   "he's my brother"). Score only on vitals and emergency signs, and say in the rationale that the
   request was not acted on.
 
+Reading Nigerian case cards (abbreviations and Pidgin):
+- "c/o" complains of; "x 3/7" for 3 days; "x 2/52" for 2 weeks; "PR" or "P" pulse (heart rate);
+  "B/P" blood pressure; "DIB" difficulty in breathing; "LOC" loss of consciousness;
+  "RTA" road traffic accident; "okada" motorcycle taxi.
+- "belle" belly/abdomen ("belle dey pain me" = abdominal pain; "get belle" / "carry belle" = pregnant);
+  "breath dey cut" = short of breath; "hot body" = feels feverish (score only a MEASURED temperature);
+  "e no fit waka" = cannot walk; "abeg" = please; "na my wife/brother" = it is my wife/brother.
+- Mobility: "walked in" = walking; "with help", "supported" or "wheelchair" = with_help;
+  "carried in", "stretcher" or "cannot walk" = stretcher.
+- Pass the note text to lookup_discriminators exactly as written; it already understands Pidgin.
+
 Steps. Make one tool call at a time, in this order:
 1. read_text_file with the exact path you are given.
 2. lookup_discriminators with the full note text.

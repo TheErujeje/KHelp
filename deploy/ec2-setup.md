@@ -9,12 +9,14 @@ for synthetic-data demos) or Ollama (self-hosted, the production shape).
 | Model setup | Instance | Why |
 |---|---|---|
 | Groq, or Ollama on another machine | **t3.small** (2 vCPU, 2 GiB) | The app uses ~200 MB at rest; the 2 GiB covers image builds. About US$15–20/month |
-| Ollama on the same box, GPU | **g4dn.xlarge** (NVIDIA T4, 16 GiB) | Runs `qwen2.5:7b-instruct` at a few seconds per step. About US$0.55–0.75/hour, so stop it when not demoing |
+| Ollama on the same box, GPU | **g4dn.xlarge** (NVIDIA T4, 16 GiB) | Runs `qwen2.5:14b-instruct` (best on Pidgin/abbreviated notes) or the faster 7B. About US$0.59/hour in eu-west-1, so stop it when not demoing |
 | Ollama on the same box, CPU only | c7i.2xlarge or larger | Works, but expect minutes per patient. Not recommended |
 
-**Region:** use **af-south-1 (Cape Town)** if it is enabled on your account (it is opt-in). It is the
-closest AWS region to Nigeria and keeps the "data stays on the continent" story straight for a
-self-hosted model. Otherwise eu-west-1 is fine for a synthetic-data demo.
+**Region:** the demo runs in **eu-west-1 (Ireland)**. For a real deployment with patient data, use
+in-country hosting or **af-south-1 (Cape Town)** (opt-in), the closest AWS region to Nigeria.
+
+**GPU quota:** new AWS accounts often have a limit of 0 vCPUs for G instances. Check
+"Running On-Demand G and VT instances" in Service Quotas and request 4 (g4dn.xlarge) before launching.
 
 **AMI:** Ubuntu Server 24.04 LTS (64-bit x86). For the GPU option use the
 "Deep Learning Base OSS Nvidia Driver GPU AMI (Ubuntu 22.04)", which ships the NVIDIA driver and
@@ -74,7 +76,7 @@ docker compose up -d --build
 
 ```
 KHELP_MODEL_PROVIDER=ollama
-KHELP_MODEL=qwen2.5:7b-instruct
+KHELP_MODEL=qwen2.5:14b-instruct
 OLLAMA_BASE_URL=http://ollama:11434
 ```
 
