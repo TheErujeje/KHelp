@@ -77,3 +77,14 @@ def test_child_must_go_to_manual_triage():
     r = check_proposal(priority="YELLOW", vitals={"rr": 24, "hr": 110, "bp": "100/60", "temp": "38.0C"},
                        age_years=6, discriminator_ids=[], rationale="TEWS.", note=note)
     assert codes(r) == {"OUTCOME_MANUAL_TRIAGE"}
+
+
+def test_mismatch_with_missing_inputs_says_propose_not_recheck():
+    note = "SYNTHETIC. 28yr F abdo pain. walked in with help, alert. RR 18 PR 104 BP 100/70 T 38.9C"
+    vitals = {"rr": 18, "hr": 104, "bp": "100/70", "temp": "38.9C", "avpu": "alert", "mobility": "with_help"}
+    r = check_proposal(priority="RED", vitals=vitals, age_years=28, discriminator_ids=["disc.yellow.abdominal_pain"],
+                       rationale="TEWS 6.", note=note)
+    assert codes(r) == {"PRIORITY_MISMATCH"}
+    err = r.errors[0]
+    assert err["details"]["next_call"] == {"tool": "propose_priority", "priority": "ORANGE"}
+    assert "Do NOT call request_recheck" in err["how_to_fix"]

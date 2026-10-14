@@ -215,10 +215,14 @@ def check_proposal(
         errors.append(_error(f"OUTCOME_{decision['outcome']}", "a priority cannot be proposed for this patient",
                              how, reasons=decision["reasons"], outstanding_inputs=decision["outstanding_inputs"]))
     elif decision["priority"] != priority:
-        errors.append(_error("PRIORITY_MISMATCH",
-                             f"the rules give {decision['priority']}, not {priority}",
-                             f"Re-read the TEWS breakdown and emergency signs, then propose {decision['priority']}.",
-                             expected=decision["priority"], reasons=decision["reasons"]))
+        how = f"Call propose_priority again with priority={decision['priority']} and the same citations."
+        if decision["outcome"] == "PROPOSE_AND_RECHECK":
+            how += (f" {', '.join(decision['outstanding_inputs'])} not recorded, but the patient is already "
+                    f"{decision['priority']} on the available evidence: propose now. The server raises the "
+                    "re-check for the missing inputs itself. Do NOT call request_recheck instead.")
+        errors.append(_error("PRIORITY_MISMATCH", f"the rules give {decision['priority']}, not {priority}", how,
+                             expected=decision["priority"], reasons=decision["reasons"],
+                             next_call={"tool": "propose_priority", "priority": decision["priority"]}))
 
     if errors:
         return CheckResult(ok=False, errors=errors, decision=decision, tews=tews, discriminators=matches)

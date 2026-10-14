@@ -10,6 +10,7 @@ import argparse
 import json
 from pathlib import Path
 
+from dotenv import load_dotenv
 from sqlalchemy import select
 
 from khelp_db import AgentRun, AuditLog, Intake, Patient, Proposal, RecheckFlag, session_factory
@@ -28,6 +29,7 @@ def _print_event(event: dict) -> None:
 
 
 def main() -> None:
+    load_dotenv()
     parser = argparse.ArgumentParser(description="Run the KHelp triage agent on one synthetic note")
     parser.add_argument("note_file", nargs="?", type=Path)
     parser.add_argument("--text", help="note text instead of a file")

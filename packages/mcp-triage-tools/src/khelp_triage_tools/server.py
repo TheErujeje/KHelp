@@ -180,8 +180,7 @@ def propose_priority(
             flag = data.insert_recheck(
                 s, patient_id=patient_id, flag_type="MISSING_VITALS",
                 reason=f"Proposed {decision['priority']} on available evidence; could be "
-                       f"{decision['priority_high']} once {', '.join(decision['outstanding_inputs'])} "
-                       "are recorded",
+                       f"{decision['priority_high']}. Record: {', '.join(decision['outstanding_inputs'])}",
                 details={"outstanding_inputs": decision["outstanding_inputs"], "proposal_id": proposal.id})
             flag_id = flag.id
         return {
@@ -191,7 +190,11 @@ def propose_priority(
             "priority": decision["priority"],
             "outcome": decision["outcome"],
             "recheck_flag_id": flag_id,
-            "citations": result.citations,
+            # Full citations are stored with the proposal and shown to the clinician;
+            # the agent only needs to know they were recorded.
+            "citation_count": len(result.citations),
+            "cited_ids": [c.get("band_id") or c.get("rule_id") or c.get("discriminator_id")
+                          for c in result.citations],
             "note": "Awaiting approval by a named clinician. Queue position is unchanged.",
         }
     return _audited("propose_priority", inputs, patient_id, run)

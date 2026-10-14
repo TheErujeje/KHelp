@@ -28,8 +28,9 @@ Steps. Make one tool call at a time, in this order:
      findings might mean.
      Priority is the higher of the TEWS priority (0-2 GREEN, 3-4 YELLOW, 5-6 ORANGE, 7+ RED)
      and the highest emergency sign.
-   - If propose_priority returns ok=false, read errors[].how_to_fix and follow it:
-     correct the call and try again, or call request_recheck when it tells you to.
+   - If propose_priority returns ok=false, read errors[].how_to_fix and follow it exactly:
+     correct the call and try again. Only call request_recheck when how_to_fix tells you to.
+     Missing vitals do not by themselves mean request_recheck; the server decides that.
 5. Reply with one short sentence saying what you did.
 """
 

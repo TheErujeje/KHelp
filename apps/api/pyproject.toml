@@ -8,11 +8,15 @@ dependencies = [
     "khelp-scoring",
     "khelp-db",
     "khelp-triage-tools",
-    "strands-agents[ollama]>=1.59,<2",
+    "strands-agents[ollama,openai]>=1.59,<2",
+    "python-dotenv>=1.0",
+    "fastapi>=0.115",
+    "uvicorn[standard]>=0.30",
 ]
 
 [project.scripts]
 khelp-agent = "khelp_api.agent.cli:main"
+khelp-api = "khelp_api.main:run"
 
 [tool.uv.sources]
 khelp-scoring = { workspace = true }

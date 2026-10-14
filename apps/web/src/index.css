@@ -1,0 +1,10 @@
+@import "tailwindcss";
+
+@theme {
+  --color-sats-red: #dc2626;
+  --color-sats-orange: #ea580c;
+  --color-sats-yellow: #eab308;
+  --color-sats-green: #16a34a;
+}
+
+html, body { @apply bg-slate-50 text-slate-900; }

@@ -13,7 +13,7 @@ import sys
 import threading
 import time
 import uuid
-from dataclasses import dataclass
+from dataclasses import dataclass, field
 from datetime import datetime, timezone
 from pathlib import Path
 from typing import Any, Callable
@@ -22,7 +22,9 @@ from mcp import StdioServerParameters
 from mcp.client.stdio import stdio_client
 from sqlalchemy import select
 from strands import Agent
+from strands.models.model import Model
 from strands.models.ollama import OllamaModel
+from strands.models.openai import OpenAIModel
 from strands.tools.executors import SequentialToolExecutor
 from strands.tools.mcp import MCPClient
 
@@ -41,13 +43,57 @@ NUDGE = ("You have not finished. Make the next tool call now: propose_priority, 
          "previous error told you to. Do not reply with text until a tool has returned ok=true.")
 
 
+def _env(name: str, default: str) -> Callable[[], str]:
+    return lambda: os.environ.get(name, default)
+
+
 @dataclass
 class Settings:
-    model: str = os.environ.get("KHELP_MODEL", "qwen2.5:7b-instruct")
-    ollama_url: str = os.environ.get("OLLAMA_BASE_URL", "http://localhost:11434")
-    max_tool_calls: int = int(os.environ.get("KHELP_MAX_TOOL_CALLS", "12"))
-    timeout_s: int = int(os.environ.get("KHELP_RUN_TIMEOUT_SECONDS", "180"))
-    intake_dir: Path = Path(os.environ.get("KHELP_INTAKE_DIR", REPO_ROOT / "data" / "intake")).resolve()
+    # Read at construction time, after .env has been loaded.
+    provider: str = field(default_factory=_env("KHELP_MODEL_PROVIDER", "ollama"))
+    model: str = field(default_factory=_env("KHELP_MODEL", "qwen2.5:7b-instruct"))
+    ollama_url: str = field(default_factory=_env("OLLAMA_BASE_URL", "http://localhost:11434"))
+    groq_url: str = field(default_factory=_env("GROQ_BASE_URL", "https://api.groq.com/openai/v1"))
+    max_tool_calls: int = field(default_factory=lambda: int(os.environ.get("KHELP_MAX_TOOL_CALLS", "12")))
+    timeout_s: int = field(default_factory=lambda: int(os.environ.get("KHELP_RUN_TIMEOUT_SECONDS", "180")))
+    intake_dir: Path = field(default_factory=lambda: Path(
+        os.environ.get("KHELP_INTAKE_DIR", REPO_ROOT / "data" / "intake")).resolve())
+
+    @property
+    def model_label(self) -> str:
+        return f"{self.provider}:{self.model}"
+
+
+def _groq_params(model: str) -> dict[str, Any]:
+    params: dict[str, Any] = {"temperature": 0.0}
+    effort = os.environ.get("KHELP_REASONING_EFFORT", "low")
+    if model.startswith("openai/gpt-oss") and effort:
+        params["reasoning_effort"] = effort  # scoring is rule-checked server-side; long reasoning only adds latency
+    return params
+
+
+def build_model(settings: Settings) -> Model:
+    """Open-weights models only: served by our own Ollama, or by Groq for synthetic-data testing."""
+    if settings.provider == "ollama":
+        return OllamaModel(host=settings.ollama_url, model_id=settings.model, temperature=0.0,
+                           keep_alive="10m", options={"num_ctx": 8192})
+    if settings.provider == "groq":
+        api_key = os.environ.get("GROQ_API_KEY")
+        if not api_key:
+            raise RuntimeError("KHELP_MODEL_PROVIDER=groq needs GROQ_API_KEY")
+        return OpenAIModel(client_args={"api_key": api_key, "base_url": settings.groq_url},
+                           model_id=settings.model, params=_groq_params(settings.model))
+    raise ValueError(f"Unknown KHELP_MODEL_PROVIDER {settings.provider!r} (use ollama or groq)")
+
+
+# Subprocesses get only what they need: never the model API key.
+_BASE_ENV = ("PATH", "HOME", "LANG", "TMPDIR", "SYSTEMROOT")
+
+
+def _subprocess_env(**extra: str) -> dict[str, str]:
+    env = {k: os.environ[k] for k in _BASE_ENV if k in os.environ}
+    env.update(extra)
+    return env
 
 
 def write_note_file(settings: Settings, patient_id: int, intake_id: int, text: str) -> Path:
@@ -58,14 +104,17 @@ def write_note_file(settings: Settings, patient_id: int, intake_id: int, text: s
 
 
 def _triage_tools_client(run_id: str, settings: Settings) -> MCPClient:
-    env = {**os.environ, "KHELP_RUN_ID": run_id, "KHELP_MODEL": settings.model}
+    passthrough = {k: os.environ[k] for k in ("MCP_DATABASE_URL", "DATABASE_URL", "KHELP_SATS_DIR")
+                   if k in os.environ}
+    env = _subprocess_env(KHELP_RUN_ID=run_id, KHELP_MODEL=settings.model_label, **passthrough)
     params = StdioServerParameters(command=sys.executable, args=["-m", "khelp_triage_tools.server"], env=env)
     return MCPClient(lambda: stdio_client(params))
 
 
 def _filesystem_client(settings: Settings) -> MCPClient:
     # Borrowed server, limited to reading files in the intake directory.
-    params = StdioServerParameters(command="npx", args=["-y", FILESYSTEM_SERVER, str(settings.intake_dir)])
+    params = StdioServerParameters(command="npx", args=["-y", FILESYSTEM_SERVER, str(settings.intake_dir)],
+                                   env=_subprocess_env())
     return MCPClient(lambda: stdio_client(params), tool_filters={"allowed": ["read_text_file"]})
 
 
@@ -106,9 +155,11 @@ def run_agent(patient_id: int, intake_id: int, kind: str = "INITIAL", settings: 
 
     with Session() as s, s.begin():
         intake = s.get(Intake, intake_id)
-        s.add(AgentRun(id=run_id, patient_id=patient_id, intake_id=intake_id, kind=kind, model=settings.model))
+        s.add(AgentRun(id=run_id, patient_id=patient_id, intake_id=intake_id, kind=kind,
+                       model=settings.model_label))
         s.flush()
-        _audit(s, run_id, patient_id, "RUN_START", {"kind": kind, "intake_id": intake_id}, settings.model)
+        _audit(s, run_id, patient_id, "RUN_START", {"kind": kind, "intake_id": intake_id},
+               settings.model_label)
         note_path = Path(intake.note_path) if intake.note_path else write_note_file(
             settings, patient_id, intake_id, intake.note_text)
         intake.note_path = str(note_path)
@@ -116,16 +167,14 @@ def run_agent(patient_id: int, intake_id: int, kind: str = "INITIAL", settings: 
     prompt = (intake_prompt(patient_id, str(note_path)) if kind == "INITIAL"
               else recheck_prompt(patient_id, str(note_path), _previous_tews(patient_id)))
 
-    hooks = RunHooks(run_id, patient_id, settings.model, settings.max_tool_calls, on_event)
-    model = OllamaModel(host=settings.ollama_url, model_id=settings.model, temperature=0.0,
-                        keep_alive="10m", options={"num_ctx": 8192})
+    hooks = RunHooks(run_id, patient_id, settings.model_label, settings.max_tool_calls, on_event)
     started = time.perf_counter()
     status, error, final_message, usage = "COMPLETED", None, None, {}
 
     try:
         with _triage_tools_client(run_id, settings) as triage, _filesystem_client(settings) as fs:
             tools = triage.list_tools_sync() + fs.list_tools_sync()
-            agent = Agent(model=model, tools=tools, system_prompt=SYSTEM_PROMPT, hooks=[hooks],
+            agent = Agent(model=build_model(settings), tools=tools, system_prompt=SYSTEM_PROMPT, hooks=[hooks],
                           callback_handler=None, tool_executor=SequentialToolExecutor())
             timed_out = threading.Event()
 
@@ -143,7 +192,7 @@ def run_agent(patient_id: int, intake_id: int, kind: str = "INITIAL", settings: 
                     if (kind != "INITIAL" or timed_out.is_set() or hooks.limit_hit
                             or result.stop_reason == "cancelled" or _has_action(run_id)):
                         break
-                    _audit_nudge(run_id, patient_id, settings.model, str(result))
+                    _audit_nudge(run_id, patient_id, settings.model_label, str(result))
                     result = agent(NUDGE)
             finally:
                 timer.cancel()
@@ -159,7 +208,7 @@ def run_agent(patient_id: int, intake_id: int, kind: str = "INITIAL", settings: 
 
     latency_ms = int((time.perf_counter() - started) * 1000)
     _finish(run_id, patient_id, kind, status, error, final_message, usage, latency_ms, hooks.tool_calls,
-            settings.model)
+            settings.model_label)
     return run_id
 
 
