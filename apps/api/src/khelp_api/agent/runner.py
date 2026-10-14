@@ -10,6 +10,7 @@ from __future__ import annotations
 import logging
 import os
 import sys
+import itertools
 import threading
 import time
 import uuid
@@ -110,16 +111,37 @@ def _groq_params(model: str) -> dict[str, Any]:
     return params
 
 
+_groq_lock = threading.Lock()
+_groq_cycle: tuple[tuple[str, ...], "itertools.cycle[str]"] | None = None
+
+
+def groq_keys() -> tuple[str, ...]:
+    """GROQ_API_KEYS (comma-separated; rendered from a JSON list or dict in SSM), else GROQ_API_KEY."""
+    pool = [k.strip() for k in os.environ.get("GROQ_API_KEYS", "").split(",") if k.strip()]
+    if not pool and os.environ.get("GROQ_API_KEY", "").strip():
+        pool = [os.environ["GROQ_API_KEY"].strip()]
+    return tuple(dict.fromkeys(pool))
+
+
+def next_groq_key() -> str:
+    """Round-robin over the key pool, one key per agent run, so load spreads across keys."""
+    global _groq_cycle
+    keys = groq_keys()
+    if not keys:
+        raise RuntimeError("KHELP_HOSTED_PROVIDER=groq needs GROQ_API_KEYS or GROQ_API_KEY")
+    with _groq_lock:
+        if _groq_cycle is None or _groq_cycle[0] != keys:
+            _groq_cycle = (keys, itertools.cycle(keys))
+        return next(_groq_cycle[1])
+
+
 def build_model(settings: Settings) -> Model:
     """Self-hosted Ollama, or a hosted model (Groq / Bedrock) for synthetic-data use."""
     if settings.provider == "ollama":
         return OllamaModel(host=settings.ollama_url, model_id=settings.model, temperature=0.0,
                            keep_alive="10m", options={"num_ctx": 8192})
     if settings.provider == "groq":
-        api_key = os.environ.get("GROQ_API_KEY")
-        if not api_key:
-            raise RuntimeError("KHELP_HOSTED_PROVIDER=groq needs GROQ_API_KEY")
-        return OpenAIModel(client_args={"api_key": api_key, "base_url": settings.groq_url},
+        return OpenAIModel(client_args={"api_key": next_groq_key(), "base_url": settings.groq_url},
                            model_id=settings.model, params=_groq_params(settings.model))
     if settings.provider == "bedrock":
         # Credentials come from the default AWS chain (the instance role on EC2).

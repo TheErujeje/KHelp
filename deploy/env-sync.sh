@@ -22,6 +22,10 @@ aws ssm get-parameter --region "$REGION" --name "$PARAM" --with-decryption --que
 import json, sys
 env = json.load(sys.stdin)
 for key, value in env.items():
+    if isinstance(value, dict):      # e.g. GROQ_API_KEYS as {"name": "key", ...}
+        value = ",".join(str(v) for v in value.values())
+    elif isinstance(value, list):
+        value = ",".join(str(v) for v in value)
     value = str(value)
     if "\n" in value or not key.replace("_", "").isalnum():
         sys.exit(f"invalid entry {key!r}")

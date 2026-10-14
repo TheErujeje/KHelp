@@ -43,6 +43,7 @@ services:
       OLLAMA_BASE_URL: ${OLLAMA_BASE_URL:-http://ollama:11434}
       OLLAMA_MODEL: ${OLLAMA_MODEL:-qwen2.5:7b-instruct}
       GROQ_API_KEY: ${GROQ_API_KEY:-}
+      GROQ_API_KEYS: ${GROQ_API_KEYS:-}
       GROQ_MODEL: ${GROQ_MODEL:-openai/gpt-oss-120b}
       KHELP_HOSTED_PROVIDER: ${KHELP_HOSTED_PROVIDER:-groq}
       BEDROCK_MODEL_ID: ${BEDROCK_MODEL_ID:-openai.gpt-oss-120b-1:0}
@@ -55,6 +56,9 @@ services:
       KHELP_MAX_CONCURRENT_RUNS: ${KHELP_MAX_CONCURRENT_RUNS:-2}
     volumes:
       - intake:/app/data/intake
+    # Lets OLLAMA_BASE_URL=http://host.docker.internal:11434 reach an Ollama installed on the host
+    # (on a Mac, native Ollama uses the GPU; Ollama inside Docker cannot).
+    extra_hosts: ["host.docker.internal:host-gateway"]
     expose: ["8000"]
     deploy:
       resources:

@@ -5,7 +5,7 @@ from khelp_api.agent.runner import Settings
 
 @pytest.fixture(autouse=True)
 def clean_env(monkeypatch):
-    for key in ("KHELP_USE_LOCAL_MODEL", "KHELP_HOSTED_PROVIDER", "OLLAMA_MODEL", "GROQ_MODEL",
+    for key in ("GROQ_API_KEY", "GROQ_API_KEYS", "KHELP_USE_LOCAL_MODEL", "KHELP_HOSTED_PROVIDER", "OLLAMA_MODEL", "GROQ_MODEL",
                 "BEDROCK_MODEL_ID", "BEDROCK_REGION"):
         monkeypatch.delenv(key, raising=False)
 
@@ -41,3 +41,16 @@ def test_bad_values_fail_loudly(monkeypatch, key, value):
     monkeypatch.setenv(key, value)
     with pytest.raises(ValueError):
         Settings()
+
+
+def test_groq_key_pool_round_robin(monkeypatch):
+    from khelp_api.agent.runner import groq_keys, next_groq_key
+    monkeypatch.setenv("GROQ_API_KEYS", "k1, k2,k3,k2")
+    assert groq_keys() == ("k1", "k2", "k3")
+    assert [next_groq_key() for _ in range(4)] == ["k1", "k2", "k3", "k1"]
+
+
+def test_single_groq_key_fallback(monkeypatch):
+    from khelp_api.agent.runner import groq_keys
+    monkeypatch.setenv("GROQ_API_KEY", "only")
+    assert groq_keys() == ("only",)
