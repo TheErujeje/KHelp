@@ -76,6 +76,33 @@ def create_recheck(patient_id: int, body: RecheckIn, s: Session = Depends(get_se
     return started
 
 
+@router.post("/patients/{patient_id}/score", status_code=202)
+def score_patient(patient_id: int, s: Session = Depends(get_session)) -> dict[str, Any]:
+    """Run the agent on a waiting patient's existing intake note (e.g. seeded patients)."""
+    with s.begin():
+        patient = s.get(Patient, patient_id)
+        if patient is None:
+            raise HTTPException(404, "patient not found")
+        if patient.status != "WAITING":
+            raise HTTPException(409, f"patient is {patient.status}, not WAITING")
+        running = s.scalars(select(AgentRun).where(AgentRun.patient_id == patient_id,
+                                                   AgentRun.status == "RUNNING")).first()
+        if running:
+            raise HTTPException(409, "the agent is already scoring this patient")
+        intake = s.scalars(select(Intake).where(Intake.patient_id == patient_id, Intake.kind == "INITIAL")
+                           .order_by(Intake.id.desc()).limit(1)).first()
+        if intake is None:
+            raise HTTPException(409, "patient has no intake note")
+        if not intake.note_path:
+            intake.note_path = str(write_note_file(Settings(), patient_id, intake.id, intake.note_text))
+        run_id = str(uuid.uuid4())
+        _audit(s, event_type="SCORE_REQUESTED", patient_id=patient_id, actor=None,
+               outputs={"intake_id": intake.id, "run_id": run_id}, run_id=run_id)
+        started = {"patient_id": patient_id, "intake_id": intake.id, "run_id": run_id}
+    submit_run(patient_id, started["intake_id"], "INITIAL", run_id)
+    return started
+
+
 # --------------------------------------------------------------------------- queue / patients
 
 def _latest_run(s: Session, patient_id: int) -> AgentRun | None:

@@ -19,8 +19,9 @@ Steps. Make one tool call at a time, in this order:
    rr, hr, bp ("120/80"), temp (with the unit as written, e.g. "38.2C" or "101F"), spo2,
    avpu (alert / confused / voice / pain / unresponsive), mobility (walking / with_help / stretcher),
    trauma (yes / no). Include avpu, mobility or trauma only if the note says so.
-4. Finish with exactly one action:
-   - Age under 12, or no age written: request_recheck with flag_type "MANUAL_TRIAGE".
+4. Finish with exactly one action. Ages are often written "45yrs", "45yr", "45 yrs" or "45/M"
+   (45-year-old male) or "33/F"; all of these are an age.
+   - Age under 12, or no age written at all: request_recheck with flag_type "MANUAL_TRIAGE".
    - Otherwise: propose_priority with patient_id, priority, the SAME vitals you gave compute_tews,
      age_years (as written), discriminator_ids (the cite_these_ids list from step 2), and a
      one-sentence rationale that only lists the TEWS points and emergency signs, for example

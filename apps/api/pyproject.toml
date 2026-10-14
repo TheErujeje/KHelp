@@ -17,6 +17,7 @@ dependencies = [
 [project.scripts]
 khelp-agent = "khelp_api.agent.cli:main"
 khelp-api = "khelp_api.main:run"
+khelp-seed = "khelp_api.seed:main"
 
 [tool.uv.sources]
 khelp-scoring = { workspace = true }

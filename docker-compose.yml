@@ -1,0 +1,98 @@
+# KHelp: one command.
+#
+#   cp .env.example .env            # set passwords and the model
+#   docker compose up -d --build                         # model on Groq or a remote Ollama
+#   docker compose --profile local-model up -d --build   # model on this machine (Ollama)
+#
+# All patient data is synthetic.
+
+name: khelp
+
+services:
+  db:
+    image: postgres:16-alpine
+    restart: unless-stopped
+    environment:
+      POSTGRES_DB: ${POSTGRES_DB:-khelp}
+      POSTGRES_USER: ${POSTGRES_USER:-khelp}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:?set POSTGRES_PASSWORD in .env}
+    volumes:
+      - pgdata:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U ${POSTGRES_USER:-khelp} -d ${POSTGRES_DB:-khelp}"]
+      interval: 5s
+      timeout: 3s
+      retries: 20
+    deploy:
+      resources:
+        limits: { memory: 384m }
+
+  api:
+    build:
+      context: .
+      dockerfile: apps/api/Dockerfile
+    restart: unless-stopped
+    depends_on:
+      db: { condition: service_healthy }
+    environment:
+      DATABASE_URL: postgresql+psycopg://${POSTGRES_USER:-khelp}:${POSTGRES_PASSWORD}@db:5432/${POSTGRES_DB:-khelp}
+      MCP_DATABASE_URL: postgresql+psycopg://khelp_mcp:${MCP_DB_PASSWORD:?set MCP_DB_PASSWORD in .env}@db:5432/${POSTGRES_DB:-khelp}
+      MCP_DB_PASSWORD: ${MCP_DB_PASSWORD}
+      KHELP_MODEL_PROVIDER: ${KHELP_MODEL_PROVIDER:-ollama}
+      KHELP_MODEL: ${KHELP_MODEL:-qwen2.5:7b-instruct}
+      OLLAMA_BASE_URL: ${OLLAMA_BASE_URL:-http://ollama:11434}
+      GROQ_API_KEY: ${GROQ_API_KEY:-}
+      KHELP_REASONING_EFFORT: ${KHELP_REASONING_EFFORT:-low}
+      KHELP_MAX_TOOL_CALLS: ${KHELP_MAX_TOOL_CALLS:-12}
+      KHELP_RUN_TIMEOUT_SECONDS: ${KHELP_RUN_TIMEOUT_SECONDS:-180}
+      KHELP_SEED_COUNT: ${KHELP_SEED_COUNT:-8}
+      KHELP_API_WORKERS: ${KHELP_API_WORKERS:-1}
+      KHELP_MAX_CONCURRENT_RUNS: ${KHELP_MAX_CONCURRENT_RUNS:-2}
+    volumes:
+      - intake:/app/data/intake
+    expose: ["8000"]
+    deploy:
+      resources:
+        limits: { memory: 768m }
+
+  web:
+    build:
+      context: .
+      dockerfile: apps/web/Dockerfile
+    restart: unless-stopped
+    depends_on: [api]
+    environment:
+      SITE_ADDRESS: ${SITE_ADDRESS:-:80}
+    ports:
+      - "80:80"
+      - "443:443"
+    volumes:
+      - caddy_data:/data
+    deploy:
+      resources:
+        limits: { memory: 128m }
+
+  # Self-hosted model. Only started with --profile local-model.
+  ollama:
+    image: ollama/ollama
+    profiles: ["local-model"]
+    restart: unless-stopped
+    volumes:
+      - ollama:/root/.ollama
+    expose: ["11434"]
+
+  # Pulls KHELP_MODEL into the local Ollama once, then exits.
+  ollama-pull:
+    image: ollama/ollama
+    profiles: ["local-model"]
+    depends_on: [ollama]
+    environment:
+      OLLAMA_HOST: http://ollama:11434
+    entrypoint: ["/bin/sh", "-c", "sleep 3 && ollama pull ${KHELP_MODEL:-qwen2.5:7b-instruct}"]
+    restart: "no"
+
+volumes:
+  pgdata:
+  intake:
+  caddy_data:
+  ollama:

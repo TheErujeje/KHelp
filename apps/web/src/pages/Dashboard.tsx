@@ -1,7 +1,7 @@
 import { useState } from "react";
-import { Link } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
 import { AlertTriangle, ClipboardCheck, Clock, Plus, Users } from "lucide-react";
-import { usePendingFlags, usePendingProposals, useQueue, type Priority, type QueueRow } from "../api";
+import { usePendingFlags, usePendingProposals, useQueue, useScorePatient, type Priority, type QueueRow } from "../api";
 import { FlagReview, ProposalReview } from "../components/Review";
 import { Drawer, ErrorText, FlagChip, PageHeader, PriorityBadge } from "../components/ui";
 import { waitLabel } from "../lib";
@@ -79,6 +79,9 @@ export default function Dashboard() {
 function QueueLine({ r, pos, onReview }: { r: QueueRow; pos: number; onReview: (r: Review) => void }) {
   const scoring = r.latest_run?.status === "RUNNING";
   const firstFlag = r.pending_flags[0];
+  const score = useScorePatient();
+  const navigate = useNavigate();
+  const unscored = !r.latest_run && !r.approved_priority;
   return (
     <tr className="border-b border-line last:border-0 hover:bg-slate-50/60">
       <td className={`w-1 p-0 ${r.approved_priority ? ROW_ACCENT[r.approved_priority] : "bg-slate-200"}`} />
@@ -103,7 +106,8 @@ function QueueLine({ r, pos, onReview }: { r: QueueRow; pos: number; onReview: (
             </span>
           )}
           {r.pending_flags.map((f) => <FlagChip key={f.id} flag={f} />)}
-          {!scoring && !r.pending_proposal && r.pending_flags.length === 0 && <span className="text-xs text-ink-3">—</span>}
+          {unscored && <span className="text-xs text-ink-3">Not scored yet</span>}
+          {!unscored && !scoring && !r.pending_proposal && r.pending_flags.length === 0 && <span className="text-xs text-ink-3">—</span>}
         </div>
       </td>
       <td className="px-4 py-3 text-right">
@@ -113,6 +117,10 @@ function QueueLine({ r, pos, onReview }: { r: QueueRow; pos: number; onReview: (
         ) : firstFlag ? (
           <button className="btn-secondary px-3 py-1.5 text-xs" onClick={() => onReview({ kind: "flag", id: firstFlag.id })}>
             Review flag</button>
+        ) : unscored ? (
+          <button className="btn-primary px-3 py-1.5 text-xs" disabled={score.isPending}
+            onClick={() => score.mutate(r.id, { onSuccess: (x) => navigate(`/runs/${x.run_id}`) })}>
+            Score</button>
         ) : scoring && r.latest_run ? (
           <Link to={`/runs/${r.latest_run.id}`} className="btn-secondary px-3 py-1.5 text-xs">Watch</Link>
         ) : (

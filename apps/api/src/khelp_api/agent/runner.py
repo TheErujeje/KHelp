@@ -113,8 +113,10 @@ def _triage_tools_client(run_id: str, settings: Settings) -> MCPClient:
 
 def _filesystem_client(settings: Settings) -> MCPClient:
     # Borrowed server, limited to reading files in the intake directory.
-    params = StdioServerParameters(command="npx", args=["-y", FILESYSTEM_SERVER, str(settings.intake_dir)],
-                                   env=_subprocess_env())
+    # In the Docker image the server is preinstalled (KHELP_FILESYSTEM_SERVER_BIN); locally npx fetches it.
+    binary = os.environ.get("KHELP_FILESYSTEM_SERVER_BIN")
+    command, args = (binary, []) if binary else ("npx", ["-y", FILESYSTEM_SERVER])
+    params = StdioServerParameters(command=command, args=[*args, str(settings.intake_dir)], env=_subprocess_env())
     return MCPClient(lambda: stdio_client(params), tool_filters={"allowed": ["read_text_file"]})
 
 

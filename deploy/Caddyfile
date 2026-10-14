@@ -1,0 +1,18 @@
+# SITE_ADDRESS=:80 serves plain HTTP (default). Set it to a domain name
+# (e.g. triage.example.org) and Caddy fetches a TLS certificate automatically.
+{$SITE_ADDRESS::80} {
+	encode gzip
+
+	handle /api/* {
+		reverse_proxy api:8000 {
+			# Stream server-sent events (the live tool-call feed) without buffering.
+			flush_interval -1
+		}
+	}
+
+	handle {
+		root * /srv
+		try_files {path} /index.html
+		file_server
+	}
+}

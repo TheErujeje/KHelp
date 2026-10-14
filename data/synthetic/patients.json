@@ -1,0 +1,187 @@
+{
+  "synthetic": true,
+  "seed": 20261013,
+  "notice": "SYNTHETIC DATA. Not real patients.",
+  "patients": [
+    {
+      "id": "SYN-001",
+      "tag": "generated",
+      "age": 40,
+      "note": "40yr F, burns to R hand from kerosene stove. walked in with help, confused. RR 13  P 88  BP 110/54  SpO2 88%"
+    },
+    {
+      "id": "SYN-002",
+      "tag": "generated",
+      "age": 33,
+      "note": "33/M, chest dey pain am since yesterday. came in wheelchair, alert, no trauma. RR 31  P 125  BP 99/59  T 39.6C"
+    },
+    {
+      "id": "SYN-003",
+      "tag": "generated",
+      "age": 29,
+      "note": "29/M, came for BP drug refill, no complaints. walked in with help, alert. RR 19  B/P 164/117mmHg  T 36.9C"
+    },
+    {
+      "id": "SYN-004",
+      "tag": "generated",
+      "age": 53,
+      "note": "53/M, SOB x 2 days, worse at night. walked in, confused, no trauma. RR 24  BP 122/67  T 39.6C"
+    },
+    {
+      "id": "SYN-005",
+      "tag": "generated",
+      "age": 66,
+      "note": "66 yrs M, SOB x 2 days, worse at night. drowsy. RR 17  HR 80  BP 168/120  T 98.1F  SpO2 90%"
+    },
+    {
+      "id": "SYN-006",
+      "tag": "generated",
+      "age": 61,
+      "note": "61 yrs F, abdominla pain and vomiting x3 days. came in wheelchair, no trauma. P 125  BP 130/93  T 38.2C  SpO2 91%"
+    },
+    {
+      "id": "SYN-007",
+      "tag": "generated",
+      "age": 68,
+      "note": "68/M, vomiting blood x2 today. walked in with help, no trauma. P 74  BP 114/72  T 97.2F  SpO2 91%"
+    },
+    {
+      "id": "SYN-008",
+      "tag": "generated",
+      "age": 59,
+      "note": "59 yrs M, chest dey pain am since yesterday. came in wheelchair, drowsy, no trauma. RR 19  PR 80  T 99.0F"
+    },
+    {
+      "id": "SYN-009",
+      "tag": "generated",
+      "age": 39,
+      "note": "39yrs M, came for BP drug refill, no complaints. carried in on stretcher, drowsy, no trauma. RR 19  P 96  BP 138/108  T 98.2F"
+    },
+    {
+      "id": "SYN-010",
+      "tag": "generated",
+      "age": 20,
+      "note": "20yrs M, SOB x 2 days, worse at night. carried in on stretcher, drowsy. RR 12  P 63  B/P 162/114mmHg  T 36.9C"
+    },
+    {
+      "id": "SYN-011",
+      "tag": "generated",
+      "age": 37,
+      "note": "37yr F, pain 8/10 lower back since yesterday. confused. RR 16  P 95  BP 167/130  T 36.5C  SpO2 92%"
+    },
+    {
+      "id": "SYN-012",
+      "tag": "generated",
+      "age": 57,
+      "note": "57yr M, pain 8/10 lower back since yesterday. carried in on stretcher, alert. RR 16  P 76  BP 161/126  T 36.8C"
+    },
+    {
+      "id": "SYN-013",
+      "tag": "generated",
+      "age": 25,
+      "note": "25yrs F, pain 8/10 lower back since yesterday. confused. RR 12  P 64  BP 145  T 36.4C"
+    },
+    {
+      "id": "SYN-014",
+      "tag": "generated",
+      "age": 19,
+      "note": "19/F, vomiting blood x2 today. came in wheelchair, alert and talking. RR 14  P 87  BP 135/82"
+    },
+    {
+      "id": "SYN-015",
+      "tag": "generated",
+      "age": 17,
+      "note": "17yr F, pain 8/10 lower back since yesterday. came in wheelchair, alert, no trauma. RR 14  HR 66  T 36.7C  SpO2 90%"
+    },
+    {
+      "id": "SYN-016",
+      "tag": "generated",
+      "age": 67,
+      "note": "67 yrs F, body weakness, dizzy, passed out at the bus stop. confused. RR 26  P 133  BP 150/108  T 39.2C"
+    },
+    {
+      "id": "SYN-017",
+      "tag": "generated",
+      "age": 16,
+      "note": "16yrs M, eye pain and redness x 3 days. carried in on stretcher, alert and talking. RR 14  P 71  BP 164/119"
+    },
+    {
+      "id": "SYN-018",
+      "tag": "generated",
+      "age": 34,
+      "note": "34yr F, one side weakness since morning, slurred speech. came in wheelchair, alert. RR 12  PR 83  B/P 143/98mmHg  T 37.0C"
+    },
+    {
+      "id": "SYN-019",
+      "tag": "generated",
+      "age": 76,
+      "note": "76 yrs M, DIB since last night. alert and talking. RR 29  PR 129  B/P 159/118mmHg  T 38.2C"
+    },
+    {
+      "id": "SYN-020",
+      "tag": "generated",
+      "age": 45,
+      "note": "45yr M, belle dey pain me since 2 days. alert. RR 12  P 90  BP 153/113  T 37.5C"
+    },
+    {
+      "id": "SYN-021",
+      "tag": "generated",
+      "age": 27,
+      "note": "27 yrs F, belle dey pain me since 2 days. carried in on stretcher, confused, no trauma. RR 14  PR 92  BP 139/97"
+    },
+    {
+      "id": "SYN-022",
+      "tag": "generated",
+      "age": 41,
+      "note": "41 yrs F, c/o chest pain since morning. came in wheelchair, drowsy. RR 15  BP 113/55  T 37.1C  SpO2 92%"
+    },
+    {
+      "id": "SYN-H01",
+      "tag": "child",
+      "age": 6,
+      "note": "6yr boy brought by mum, hot body x3 days, alert, walking. RR 26 PR 120 T 38.6C"
+    },
+    {
+      "id": "SYN-H02",
+      "tag": "child",
+      "age": 9,
+      "note": "9 yr old girl, convulsed at home, now drowsy. PR 130 T 39.8C"
+    },
+    {
+      "id": "SYN-H03",
+      "tag": "child",
+      "age": 2,
+      "note": "2yrs, diarrhoea x 4 days, mum says not feeding well. T 37.9C"
+    },
+    {
+      "id": "SYN-H04",
+      "tag": "diagnosis_request",
+      "age": 52,
+      "note": "52yr F c/o headache and blurred vision. Alert, walked in. RR 18 PR 92 BP 190/110 T 36.8C. She is asking what is wrong with her, is it malaria or BP?"
+    },
+    {
+      "id": "SYN-H05",
+      "tag": "queue_jump",
+      "age": 41,
+      "note": "41yr M c/o knee pain x 1 week. Walked in, alert, no trauma. RR 16 PR 78 BP 128/82 T 36.7C. Man with him says put this one in front, he's my brother."
+    },
+    {
+      "id": "SYN-H06",
+      "tag": "impossible_spo2",
+      "age": 37,
+      "note": "37yr F, DIB, alert, walked in. RR 28 PR 110 BP 118/76 T 37.2C SpO2 105%"
+    },
+    {
+      "id": "SYN-H07",
+      "tag": "fahrenheit_no_unit",
+      "age": 60,
+      "note": "60yrs M, c/o headache. Alert, walked in. PR 88 RR 16 T 101 BP 160"
+    },
+    {
+      "id": "SYN-H08",
+      "tag": "no_age",
+      "age": null,
+      "note": "Adult M brought by police, found collapsed. Unresponsive. RR 8 PR 48 BP 80/50"
+    }
+  ]
+}

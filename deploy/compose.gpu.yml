@@ -1,0 +1,11 @@
+# Give the local Ollama container the instance's NVIDIA GPU.
+#   docker compose -f docker-compose.yml -f deploy/compose.gpu.yml --profile local-model up -d --build
+services:
+  ollama:
+    deploy:
+      resources:
+        reservations:
+          devices:
+            - driver: nvidia
+              count: all
+              capabilities: [gpu]

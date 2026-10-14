@@ -221,6 +221,14 @@ export function useAcknowledge() {
   });
 }
 
+export function useScorePatient() {
+  const invalidate = useInvalidateAll();
+  return useMutation({
+    mutationFn: (id: number) => post<{ patient_id: number; run_id: string }>(`/patients/${id}/score`, {}),
+    onSuccess: invalidate,
+  });
+}
+
 export function useMarkSeen() {
   const invalidate = useInvalidateAll();
   return useMutation({
