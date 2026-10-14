@@ -1,11 +1,45 @@
 # Deploying KHelp to one EC2 instance
 
-**Quick path (GPU, self-hosted model), from your machine:**
+**Quick path, from your machine** (what the live demo uses):
 
-```bash
-AWS_REGION=eu-west-1 KEY_NAME=<key-pair> SECURITY_GROUP=<sg-id> deploy/launch-ec2.sh
-deploy/remote-deploy.sh ubuntu@<public-ip> ~/.ssh/<key>.pem      # defaults to qwen2.5:14b-instruct
-```
+1. Store the backend settings as one SSM SecureString parameter holding a JSON object:
+
+   ```json
+   {
+     "POSTGRES_DB": "khelp", "POSTGRES_USER": "khelp",
+     "POSTGRES_PASSWORD": "<openssl rand -hex 16>", "MCP_DB_PASSWORD": "<openssl rand -hex 16>",
+     "KHELP_MODEL_PROVIDER": "groq", "KHELP_MODEL": "openai/gpt-oss-120b",
+     "GROQ_API_KEY": "<key>", "KHELP_REASONING_EFFORT": "low",
+     "OLLAMA_BASE_URL": "http://ollama:11434",
+     "KHELP_MAX_TOOL_CALLS": "12", "KHELP_RUN_TIMEOUT_SECONDS": "180",
+     "KHELP_MAX_CONCURRENT_RUNS": "2", "KHELP_API_WORKERS": "1", "KHELP_SEED_COUNT": "8",
+     "SITE_ADDRESS": ":80"
+   }
+   ```
+
+   ```bash
+   aws ssm put-parameter --name /khelp/prod/env --type SecureString --value file://khelp-env.json
+   ```
+
+   For a self-hosted model set `KHELP_MODEL_PROVIDER=ollama`, `KHELP_MODEL=qwen2.5:14b-instruct`, and
+   either `OLLAMA_BASE_URL=http://ollama:11434` (Ollama on this GPU box) or the private address of a
+   separate GPU instance.
+
+2. Give the instance an IAM role that can read only that parameter: `ssm:GetParameter` on
+   `arn:aws:ssm:<region>:<account>:parameter/khelp/prod/*`, and `kms:Decrypt` with the condition
+   `kms:ViaService = ssm.<region>.amazonaws.com`.
+
+3. Launch and deploy:
+
+   ```bash
+   AWS_REGION=eu-west-1 INSTANCE_TYPE=t3.small KEY_NAME=<key-pair> SECURITY_GROUP=<sg-id> deploy/launch-ec2.sh
+   aws ec2 associate-iam-instance-profile --instance-id <id> --iam-instance-profile Name=<profile>
+   ENV_SSM_PARAM=/khelp/prod/env deploy/remote-deploy.sh ubuntu@<public-ip> ~/.ssh/<key>.pem
+   ```
+
+   The instance fetches the parameter itself and writes `/opt/khelp/.env` (mode 600). To change a
+   setting, update the parameter and re-run `remote-deploy.sh`. The database passwords only take
+   effect when the database is first created.
 
 The rest of this page explains the same steps by hand, and the Groq / CPU options.
 
