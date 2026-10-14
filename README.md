@@ -15,7 +15,7 @@ It never diagnoses, never prescribes, and never changes the queue by itself.
 
 ## Try the live demo
 
-**http://34.251.228.91**
+**https://klaudesk.klaudverse.com**
 
 Sign in with any name (demo sign-in, no password check). Then either press **Score** on one of the
 synthetic patients waiting on the dashboard, or open **Triage desk**, pick a sample note (or type
@@ -180,7 +180,7 @@ and are applied within a minute of a change, with no redeploy. Deployment: [depl
   can miss unusual phrasing; the nurse can always override.
 - **Low oxygen saturation** is recorded but is not yet an emergency sign in the draft rules.
 - **Demo sign-in only**: no real accounts. A hospital deployment would use its own staff login.
-- **The live demo is HTTP only** and uses a hosted model until the GPU instance is approved.
+- **The live demo** uses a hosted model until the GPU instance is approved.
 - **Smaller models need correcting.** 3B–7B models often get the priority wrong on the first try;
   the server rejects it and they fix it, which shows in the live feed. Models under 3B fail the task.
 - **Evaluation write-up (EVALS.md) and ARCHITECTURE.md are in progress.**
