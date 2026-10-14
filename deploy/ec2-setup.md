@@ -1,5 +1,14 @@
 # Deploying KHelp to one EC2 instance
 
+**Quick path (GPU, self-hosted model), from your machine:**
+
+```bash
+AWS_REGION=eu-west-1 KEY_NAME=<key-pair> SECURITY_GROUP=<sg-id> deploy/launch-ec2.sh
+deploy/remote-deploy.sh ubuntu@<public-ip> ~/.ssh/<key>.pem      # defaults to qwen2.5:14b-instruct
+```
+
+The rest of this page explains the same steps by hand, and the Groq / CPU options.
+
 Everything runs from `docker compose`: Postgres, the API (with the agent and both MCP servers inside it),
 and Caddy serving the web UI and proxying `/api`. The model is either Groq (open-weights `gpt-oss-120b`,
 for synthetic-data demos) or Ollama (self-hosted, the production shape).
