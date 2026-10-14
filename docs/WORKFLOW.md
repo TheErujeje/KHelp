@@ -108,14 +108,17 @@ Nurse                 API                   Agent (LLM)                 triage-t
 ## Where the model runs
 
 The challenge requires the task to run on an **open-weights** model and says patient data must not
-leave the country. KHelp supports two ways:
+leave the country. One setting, `KHELP_USE_LOCAL_MODEL`, chooses:
 
-- **Self-hosted (Ollama)** — the model runs on our own machine/GPU instance. This is the production
-  shape: patient data never leaves the hospital's infrastructure.
-- **Groq (hosted open-weights, e.g. `gpt-oss-120b`)** — fast, used for development and demos on
-  **synthetic data only**.
+- **`true`: self-hosted (Ollama)**, e.g. `qwen2.5:14b-instruct` on our own GPU instance. This is the
+  production shape: patient data never leaves the hospital's infrastructure.
+- **`false`: hosted**, picked by `KHELP_HOSTED_PROVIDER`:
+  - `groq`: open-weights `gpt-oss-120b` on Groq, fast; development and demos on **synthetic data only**;
+  - `bedrock`: a model on Amazon Bedrock in eu-west-1 (e.g. open-weights `openai.gpt-oss-120b-1:0`),
+    using the server's IAM role.
 
-Switch with `KHELP_MODEL_PROVIDER=ollama|groq` and `KHELP_MODEL=...`.
+On the deployed server these settings live in one SSM parameter; changing the switch there takes
+effect within about a minute, without a redeploy.
 
 ## What is *not* AI
 

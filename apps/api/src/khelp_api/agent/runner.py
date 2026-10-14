@@ -22,6 +22,7 @@ from mcp import StdioServerParameters
 from mcp.client.stdio import stdio_client
 from sqlalchemy import select
 from strands import Agent
+from strands.models.bedrock import BedrockModel
 from strands.models.model import Model
 from strands.models.ollama import OllamaModel
 from strands.models.openai import OpenAIModel
@@ -47,13 +48,50 @@ def _env(name: str, default: str) -> Callable[[], str]:
     return lambda: os.environ.get(name, default)
 
 
+HOSTED_PROVIDERS = ("groq", "bedrock")
+
+
+def _flag(name: str, default: str) -> bool:
+    value = os.environ.get(name, default).strip().lower()
+    if value not in ("true", "false", "1", "0", "yes", "no"):
+        raise ValueError(f"{name} must be true or false, not {value!r}")
+    return value in ("true", "1", "yes")
+
+
+def _provider() -> str:
+    if _flag("KHELP_USE_LOCAL_MODEL", "true"):
+        return "ollama"
+    hosted = os.environ.get("KHELP_HOSTED_PROVIDER", "groq").strip().lower()
+    if hosted not in HOSTED_PROVIDERS:
+        raise ValueError(f"KHELP_HOSTED_PROVIDER must be one of {HOSTED_PROVIDERS}, not {hosted!r}")
+    return hosted
+
+
+def _model() -> str:
+    return {
+        "ollama": lambda: os.environ.get("OLLAMA_MODEL", "qwen2.5:7b-instruct"),
+        "groq": lambda: os.environ.get("GROQ_MODEL", "openai/gpt-oss-120b"),
+        "bedrock": lambda: os.environ.get("BEDROCK_MODEL_ID", "openai.gpt-oss-120b-1:0"),
+    }[_provider()]()
+
+
 @dataclass
 class Settings:
-    # Read at construction time, after .env has been loaded.
-    provider: str = field(default_factory=_env("KHELP_MODEL_PROVIDER", "ollama"))
-    model: str = field(default_factory=_env("KHELP_MODEL", "qwen2.5:7b-instruct"))
+    """Which model runs is decided by settings alone:
+
+    - KHELP_USE_LOCAL_MODEL=true  -> self-hosted Ollama at OLLAMA_BASE_URL, model OLLAMA_MODEL
+    - KHELP_USE_LOCAL_MODEL=false -> KHELP_HOSTED_PROVIDER:
+        groq     GROQ_API_KEY, GROQ_MODEL
+        bedrock  BEDROCK_MODEL_ID, BEDROCK_REGION (credentials from the instance role)
+
+    Read at construction time (once per run), after .env has been loaded.
+    """
+
+    provider: str = field(default_factory=_provider)
+    model: str = field(default_factory=_model)
     ollama_url: str = field(default_factory=_env("OLLAMA_BASE_URL", "http://localhost:11434"))
     groq_url: str = field(default_factory=_env("GROQ_BASE_URL", "https://api.groq.com/openai/v1"))
+    bedrock_region: str = field(default_factory=_env("BEDROCK_REGION", "eu-west-1"))
     max_tool_calls: int = field(default_factory=lambda: int(os.environ.get("KHELP_MAX_TOOL_CALLS", "12")))
     timeout_s: int = field(default_factory=lambda: int(os.environ.get("KHELP_RUN_TIMEOUT_SECONDS", "180")))
     intake_dir: Path = field(default_factory=lambda: Path(
@@ -73,17 +111,20 @@ def _groq_params(model: str) -> dict[str, Any]:
 
 
 def build_model(settings: Settings) -> Model:
-    """Open-weights models only: served by our own Ollama, or by Groq for synthetic-data testing."""
+    """Self-hosted Ollama, or a hosted model (Groq / Bedrock) for synthetic-data use."""
     if settings.provider == "ollama":
         return OllamaModel(host=settings.ollama_url, model_id=settings.model, temperature=0.0,
                            keep_alive="10m", options={"num_ctx": 8192})
     if settings.provider == "groq":
         api_key = os.environ.get("GROQ_API_KEY")
         if not api_key:
-            raise RuntimeError("KHELP_MODEL_PROVIDER=groq needs GROQ_API_KEY")
+            raise RuntimeError("KHELP_HOSTED_PROVIDER=groq needs GROQ_API_KEY")
         return OpenAIModel(client_args={"api_key": api_key, "base_url": settings.groq_url},
                            model_id=settings.model, params=_groq_params(settings.model))
-    raise ValueError(f"Unknown KHELP_MODEL_PROVIDER {settings.provider!r} (use ollama or groq)")
+    if settings.provider == "bedrock":
+        # Credentials come from the default AWS chain (the instance role on EC2).
+        return BedrockModel(model_id=settings.model, region_name=settings.bedrock_region, temperature=0.0)
+    raise ValueError(f"Unknown model provider {settings.provider!r}")
 
 
 # Subprocesses get only what they need: never the model API key.
@@ -106,7 +147,7 @@ def write_note_file(settings: Settings, patient_id: int, intake_id: int, text: s
 def _triage_tools_client(run_id: str, settings: Settings) -> MCPClient:
     passthrough = {k: os.environ[k] for k in ("MCP_DATABASE_URL", "DATABASE_URL", "KHELP_SATS_DIR")
                    if k in os.environ}
-    env = _subprocess_env(KHELP_RUN_ID=run_id, KHELP_MODEL=settings.model_label, **passthrough)
+    env = _subprocess_env(KHELP_RUN_ID=run_id, KHELP_MODEL_LABEL=settings.model_label, **passthrough)
     params = StdioServerParameters(command=sys.executable, args=["-m", "khelp_triage_tools.server"], env=env)
     return MCPClient(lambda: stdio_client(params))
 

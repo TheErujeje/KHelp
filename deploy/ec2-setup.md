@@ -8,9 +8,14 @@
    {
      "POSTGRES_DB": "khelp", "POSTGRES_USER": "khelp",
      "POSTGRES_PASSWORD": "<openssl rand -hex 16>", "MCP_DB_PASSWORD": "<openssl rand -hex 16>",
-     "KHELP_MODEL_PROVIDER": "groq", "KHELP_MODEL": "openai/gpt-oss-120b",
-     "GROQ_API_KEY": "<key>", "KHELP_REASONING_EFFORT": "low",
-     "OLLAMA_BASE_URL": "http://ollama:11434",
+
+     "KHELP_USE_LOCAL_MODEL": "false",
+     "KHELP_HOSTED_PROVIDER": "groq",
+
+     "OLLAMA_BASE_URL": "http://<gpu-private-ip>:11434", "OLLAMA_MODEL": "qwen2.5:14b-instruct",
+     "GROQ_API_KEY": "<key>", "GROQ_MODEL": "openai/gpt-oss-120b", "KHELP_REASONING_EFFORT": "low",
+     "BEDROCK_MODEL_ID": "openai.gpt-oss-120b-1:0", "BEDROCK_REGION": "eu-west-1",
+
      "KHELP_MAX_TOOL_CALLS": "12", "KHELP_RUN_TIMEOUT_SECONDS": "180",
      "KHELP_MAX_CONCURRENT_RUNS": "2", "KHELP_API_WORKERS": "1", "KHELP_SEED_COUNT": "8",
      "SITE_ADDRESS": ":80"
@@ -21,13 +26,18 @@
    aws ssm put-parameter --name /khelp/prod/env --type SecureString --value file://khelp-env.json
    ```
 
-   For a self-hosted model set `KHELP_MODEL_PROVIDER=ollama`, `KHELP_MODEL=qwen2.5:14b-instruct`, and
-   either `OLLAMA_BASE_URL=http://ollama:11434` (Ollama on this GPU box) or the private address of a
-   separate GPU instance.
+   **Choosing the model is one switch.** `KHELP_USE_LOCAL_MODEL=true` uses the self-hosted Ollama at
+   `OLLAMA_BASE_URL` (`http://ollama:11434` runs Ollama on the same GPU box). `false` uses
+   `KHELP_HOSTED_PROVIDER`: `groq` (API key) or `bedrock` (instance role, `BEDROCK_REGION`). Every
+   option's settings stay in the parameter; only the switch changes.
 
-2. Give the instance an IAM role that can read only that parameter: `ssm:GetParameter` on
-   `arn:aws:ssm:<region>:<account>:parameter/khelp/prod/*`, and `kms:Decrypt` with the condition
-   `kms:ViaService = ssm.<region>.amazonaws.com`.
+2. Give the instance an IAM role with:
+   - `ssm:GetParameter` on `arn:aws:ssm:<region>:<account>:parameter/khelp/prod/*`, and `kms:Decrypt`
+     with the condition `kms:ViaService = ssm.<region>.amazonaws.com`;
+   - for Bedrock: `bedrock:InvokeModel` and `bedrock:InvokeModelWithResponseStream` on
+     `arn:aws:bedrock:<region>::foundation-model/*`, and set the instance metadata hop limit to 2
+     (`aws ec2 modify-instance-metadata-options --http-put-response-hop-limit 2`) so the API container
+     can use the role.
 
 3. Launch and deploy:
 
@@ -37,9 +47,11 @@
    ENV_SSM_PARAM=/khelp/prod/env deploy/remote-deploy.sh ubuntu@<public-ip> ~/.ssh/<key>.pem
    ```
 
-   The instance fetches the parameter itself and writes `/opt/khelp/.env` (mode 600). To change a
-   setting, update the parameter and re-run `remote-deploy.sh`. The database passwords only take
-   effect when the database is first created.
+   The instance fetches the parameter itself and writes `/opt/khelp/.env` (mode 600). A systemd timer
+   (`khelp-env-sync.timer`) re-reads the parameter every minute and restarts only what changed, so
+   **changing a setting in SSM needs no redeploy**; it is live within about a minute
+   (`journalctl -u khelp-env-sync` shows each change). Database passwords only take effect when the
+   database is first created.
 
 The rest of this page explains the same steps by hand, and the Groq / CPU options.
 
@@ -106,8 +118,8 @@ nano .env        # choose the model (below)
 **Groq (demo, synthetic data only):**
 
 ```
-KHELP_MODEL_PROVIDER=groq
-KHELP_MODEL=openai/gpt-oss-120b
+KHELP_USE_LOCAL_MODEL=false
+KHELP_HOSTED_PROVIDER=groq
 GROQ_API_KEY=gsk_...
 ```
 
@@ -118,8 +130,8 @@ docker compose up -d --build
 **Self-hosted on this GPU instance:**
 
 ```
-KHELP_MODEL_PROVIDER=ollama
-KHELP_MODEL=qwen2.5:14b-instruct
+KHELP_USE_LOCAL_MODEL=true
+OLLAMA_MODEL=qwen2.5:14b-instruct
 OLLAMA_BASE_URL=http://ollama:11434
 ```
 

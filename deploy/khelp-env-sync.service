@@ -1,0 +1,9 @@
+[Unit]
+Description=KHelp: apply settings from SSM Parameter Store
+After=docker.service network-online.target
+Wants=network-online.target
+
+[Service]
+Type=oneshot
+Environment=PATH=/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin:/snap/bin
+ExecStart=/opt/khelp/deploy/env-sync.sh

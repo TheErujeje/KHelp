@@ -38,10 +38,15 @@ services:
       DATABASE_URL: postgresql+psycopg://${POSTGRES_USER:-khelp}:${POSTGRES_PASSWORD}@db:5432/${POSTGRES_DB:-khelp}
       MCP_DATABASE_URL: postgresql+psycopg://khelp_mcp:${MCP_DB_PASSWORD:?set MCP_DB_PASSWORD in .env}@db:5432/${POSTGRES_DB:-khelp}
       MCP_DB_PASSWORD: ${MCP_DB_PASSWORD}
-      KHELP_MODEL_PROVIDER: ${KHELP_MODEL_PROVIDER:-ollama}
-      KHELP_MODEL: ${KHELP_MODEL:-qwen2.5:7b-instruct}
+      # true = self-hosted Ollama; false = KHELP_HOSTED_PROVIDER (groq or bedrock).
+      KHELP_USE_LOCAL_MODEL: ${KHELP_USE_LOCAL_MODEL:-true}
       OLLAMA_BASE_URL: ${OLLAMA_BASE_URL:-http://ollama:11434}
+      OLLAMA_MODEL: ${OLLAMA_MODEL:-qwen2.5:7b-instruct}
       GROQ_API_KEY: ${GROQ_API_KEY:-}
+      GROQ_MODEL: ${GROQ_MODEL:-openai/gpt-oss-120b}
+      KHELP_HOSTED_PROVIDER: ${KHELP_HOSTED_PROVIDER:-groq}
+      BEDROCK_MODEL_ID: ${BEDROCK_MODEL_ID:-openai.gpt-oss-120b-1:0}
+      BEDROCK_REGION: ${BEDROCK_REGION:-eu-west-1}
       KHELP_REASONING_EFFORT: ${KHELP_REASONING_EFFORT:-low}
       KHELP_MAX_TOOL_CALLS: ${KHELP_MAX_TOOL_CALLS:-12}
       KHELP_RUN_TIMEOUT_SECONDS: ${KHELP_RUN_TIMEOUT_SECONDS:-180}
@@ -81,14 +86,14 @@ services:
       - ollama:/root/.ollama
     expose: ["11434"]
 
-  # Pulls KHELP_MODEL into the local Ollama once, then exits.
+  # Pulls OLLAMA_MODEL into the local Ollama once, then exits.
   ollama-pull:
     image: ollama/ollama
     profiles: ["local-model"]
     depends_on: [ollama]
     environment:
       OLLAMA_HOST: http://ollama:11434
-    entrypoint: ["/bin/sh", "-c", "sleep 3 && ollama pull ${KHELP_MODEL:-qwen2.5:7b-instruct}"]
+    entrypoint: ["/bin/sh", "-c", "sleep 3 && ollama pull ${OLLAMA_MODEL:-qwen2.5:7b-instruct}"]
     restart: "no"
 
 volumes:

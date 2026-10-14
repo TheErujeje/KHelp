@@ -35,7 +35,7 @@ def add_audit(s: Session, *, tool_name: str, inputs: dict[str, Any], outputs: di
     s.add(AuditLog(
         run_id=current_run_id(), patient_id=patient_id, event_type="TOOL_CALL", source="triage-tools",
         tool_name=tool_name, inputs=inputs, outputs=outputs, is_error=is_error, latency_ms=latency_ms,
-        model=os.environ.get("KHELP_MODEL"),
+        model=os.environ.get("KHELP_MODEL_LABEL"),
     ))
     s.flush()
 
