@@ -48,10 +48,18 @@ def test_pain_score():
     assert "disc.yellow.pain_moderate" in active_ids("pain 6/10")
 
 
-def test_every_match_carries_source():
+def test_every_match_carries_manual_page():
     for m in lookup_discriminators("convulsing, vomiting blood, burns to face"):
-        assert m.source["document"]
-        assert m.verified is False
+        assert m.source["document"] == "SATS Training Manual"
+        assert m.source["location"].startswith(("p.12", "p.13"))
+        assert m.verified is True
+
+
+def test_signs_added_from_manual():
+    assert "disc.orange.stabbed_neck" in active_ids("stabbed in the neck at the market")
+    assert "disc.orange.eye_injury" in active_ids("eye injury from a stick")
+    assert "disc.yellow.pregnancy_pv_bleed" in active_ids("she get belle, PV bleeding since morning")
+    assert "disc.orange.high_energy_transfer" in active_ids("pedestrian knocked down by a bus")
 
 
 def test_no_match_for_routine_follow_up():

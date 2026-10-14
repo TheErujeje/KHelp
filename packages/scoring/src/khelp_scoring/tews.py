@@ -52,15 +52,22 @@ class TewsResult:
         return data
 
 
+def band_contains(band: dict[str, Any], value: float) -> bool:
+    """Bounds mirror the manual's wording: lt/gt = "less/more than", min/max = inclusive range."""
+    checks = (
+        ("lt", lambda b: value < b), ("gt", lambda b: value > b),
+        ("min", lambda b: value >= b), ("max", lambda b: value <= b),
+    )
+    return all(test(band[key]) for key, test in checks if band.get(key) is not None)
+
+
 def _find_band(spec: dict[str, Any], value: Any) -> dict[str, Any] | None:
     for band in spec["bands"]:
         if spec["kind"] == "categorical":
             if band["value"] == value:
                 return band
-        else:
-            lower, upper = band.get("lower"), band.get("upper")
-            if (lower is None or value >= lower) and (upper is None or value < upper):
-                return band
+        elif band_contains(band, value):
+            return band
     return None
 
 

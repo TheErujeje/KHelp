@@ -21,6 +21,7 @@ apps/web/dist/
 # Reference material (copyrighted manuals stay local; cite page/table in sats/*.yaml instead)
 docs/reference/*
 !docs/reference/.gitkeep
+!docs/reference/README.md
 
 # Runtime data
 data/intake/*.txt

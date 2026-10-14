@@ -54,7 +54,9 @@ class RuleSet:
         return entries
 
     def unverified_entries(self) -> list[dict[str, Any]]:
-        return [e for e in self.all_entries() if not e.get("verified", False)]
+        """SATS entries not yet checked against the manual (project rules are not SATS)."""
+        return [e for e in self.all_entries()
+                if e.get("kind") != "project_rule" and not e.get("verified", False)]
 
 
 def _default_sats_dir() -> Path:

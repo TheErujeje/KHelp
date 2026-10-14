@@ -173,6 +173,8 @@ def normalise_vitals(raw_vitals: dict[str, Any], rules: RuleSet) -> NormalisedVi
             if not any(i.parameter == name for i in out.issues):
                 out.issues.append(VitalIssue(name, "implausible", raw, "no number found"))
             continue
+        if spec.get("integer"):
+            value = float(round(value))  # counts and mmHg are whole numbers on the chart
         lo, hi = spec["plausible"]["min"], spec["plausible"]["max"]
         if not lo <= value <= hi:
             out.issues.append(VitalIssue(

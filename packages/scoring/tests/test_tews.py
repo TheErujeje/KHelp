@@ -17,15 +17,16 @@ def test_normal_adult_scores_complete():
     assert {i.parameter for i in r.breakdown} == {
         "respiratory_rate", "heart_rate", "systolic_bp", "temperature", "avpu", "mobility", "trauma",
     }
-    assert all(i.source and i.verified is False for i in r.breakdown)
+    assert all(i.verified and "p.26" in i.source["location"] for i in r.breakdown)
 
 
-@pytest.mark.parametrize("rr,expected", [(8, 3), (9, 0), (14, 0), (15, 1), (20, 1), (21, 2), (29, 2), (30, 3)])
+# Expected values from SATS Training Manual 2012, p.26 Figure 14 (Adult TEWS).
+@pytest.mark.parametrize("rr,expected", [(4, 2), (8, 2), (9, 0), (14, 0), (15, 1), (20, 1), (21, 2), (29, 2), (30, 3)])
 def test_respiratory_rate_band_edges(rr, expected):
     assert points(compute_tews({**NORMAL, "rr": rr}), "respiratory_rate") == expected
 
 
-@pytest.mark.parametrize("hr,expected", [(40, 3), (41, 1), (50, 1), (51, 0), (100, 0), (101, 1), (110, 1), (111, 2), (129, 2), (130, 3)])
+@pytest.mark.parametrize("hr,expected", [(40, 2), (41, 1), (50, 1), (51, 0), (100, 0), (101, 1), (110, 1), (111, 2), (129, 2), (130, 3)])
 def test_heart_rate_band_edges(hr, expected):
     assert points(compute_tews({**NORMAL, "hr": hr}), "heart_rate") == expected
 
@@ -35,7 +36,7 @@ def test_systolic_band_edges(sbp, expected):
     assert points(compute_tews({**NORMAL, "bp": f"{sbp}/50"}), "systolic_bp") == expected
 
 
-@pytest.mark.parametrize("temp,expected", [("34.9", 2), ("35", 0), ("38.4", 0), ("38.5", 2)])
+@pytest.mark.parametrize("temp,expected", [("34.9", 2), ("35", 0), ("38.4", 0), ("38.41", 2), ("38.5", 2)])
 def test_temperature_band_edges(temp, expected):
     assert points(compute_tews({**NORMAL, "temp": temp}), "temperature") == expected
 
@@ -45,6 +46,17 @@ def test_categorical_aliases():
     assert points(r, "avpu") == 1
     assert points(r, "mobility") == 1
     assert points(r, "trauma") == 1
+
+
+@pytest.mark.parametrize("avpu,expected", [("alert", 0), ("voice", 1), ("confused", 2), ("pain", 2), ("unresponsive", 3)])
+def test_avpu_points_match_manual(avpu, expected):
+    assert points(compute_tews({**NORMAL, "avpu": avpu}), "avpu") == expected
+
+
+def test_whole_number_vitals_are_rounded():
+    r = compute_tews({**NORMAL, "hr": "100.4", "rr": "14.6"})
+    assert points(r, "heart_rate") == 0     # 100 -> 51-100
+    assert points(r, "respiratory_rate") == 1  # 15 -> 15-20
 
 
 def test_fahrenheit_with_unit_is_converted():

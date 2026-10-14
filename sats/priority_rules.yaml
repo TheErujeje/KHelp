@@ -1,22 +1,31 @@
-# TEWS total -> SATS priority — DRAFT, unverified.
-# Ranges are inclusive. The final priority is the higher of the TEWS priority
-# and the highest cited discriminator priority.
+# TEWS total -> SATS priority, and how emergency signs combine with it.
+#
+# Source: SATS Training Manual 2012 (Western Cape Government Health), p.6 Figure 2 "The SATS
+# process flowchart" and p.8-9 Figure 4 "Adult SATS Chart": TEWS 7 or more = Emergency (RED),
+# 5 or 6 = Very urgent (ORANGE), 3 or 4 = Urgent (YELLOW), 0, 1 or 2 = Routine (GREEN).
+# Ranges are inclusive. The final priority is the higher of the TEWS priority and the highest
+# emergency sign found (p.6: signs found at steps 1-2, then vitals and TEWS, then the final level).
+# The senior healthcare professional may override the final priority (p.6) - in Klaudesk that is
+# the named clinician's override.
 
 order: [GREEN, YELLOW, ORANGE, RED]   # lowest to highest urgency
 
-tews_to_priority:
-  - { id: prio.tews.green,  min: 0, max: 2,    priority: GREEN,  source: { document: SATS Training Manual, edition: "2012 (confirm)", location: "TEWS to priority table (page TODO)" }, verified: false }
-  - { id: prio.tews.yellow, min: 3, max: 4,    priority: YELLOW, source: { document: SATS Training Manual, edition: "2012 (confirm)", location: "TEWS to priority table (page TODO)" }, verified: false }
-  - { id: prio.tews.orange, min: 5, max: 6,    priority: ORANGE, source: { document: SATS Training Manual, edition: "2012 (confirm)", location: "TEWS to priority table (page TODO)" }, verified: false }
-  - { id: prio.tews.red,    min: 7, max: null, priority: RED,    source: { document: SATS Training Manual, edition: "2012 (confirm)", location: "TEWS to priority table (page TODO)" }, verified: false }
+_source: &flow { document: SATS Training Manual, edition: "2012 (Western Cape Government Health)", location: "p.6 Figure 2; p.8-9 Figure 4: Adult SATS Chart" }
 
-# Project rule, not SATS: how missing or implausible TEWS inputs are handled.
-# Each missing input is bounded by its lowest and highest points. If the
-# priority is the same at both bounds it is proposed; if the lower bound is
-# already at or above `propose_with_missing_at_or_above`, that priority is
-# proposed AND a re-check is raised; otherwise only a re-check is raised.
+tews_to_priority:
+  - { id: prio.tews.green,  min: 0, max: 2,    priority: GREEN,  source: *flow, verified: true }
+  - { id: prio.tews.yellow, min: 3, max: 4,    priority: YELLOW, source: *flow, verified: true }
+  - { id: prio.tews.orange, min: 5, max: 6,    priority: ORANGE, source: *flow, verified: true }
+  - { id: prio.tews.red,    min: 7, max: null, priority: RED,    source: *flow, verified: true }
+
+# Klaudesk project rule, NOT part of SATS: how missing or implausible TEWS inputs are handled.
+# Each missing input is bounded by its lowest and highest points. If the priority is the same at
+# both bounds it is proposed; if the lower bound is already at or above
+# `propose_with_missing_at_or_above`, that priority is proposed AND a re-check is raised;
+# otherwise only a re-check is raised. Never a guessed value.
 missing_inputs:
   id: prio.missing_inputs
+  kind: project_rule
   propose_with_missing_at_or_above: ORANGE
-  source: { document: Klaudesk project rule, edition: "n/a", location: "README: Missing vitals" }
+  source: { document: Klaudesk project rule (not SATS), edition: "n/a", location: "docs/WORKFLOW.md: missing vitals" }
   verified: false

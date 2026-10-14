@@ -18,7 +18,7 @@ a **named nurse or doctor** approves or overrides it; only that human decision m
 | **triage-tools MCP server** | Our own tool server: 5 tools that do the actual scoring and record the result | `packages/mcp-triage-tools` |
 | **Filesystem MCP server** | A tool server we did not write (official MCP reference server). Lets the agent read the intake note file | installed with `npx` |
 | **Scoring library** | Plain Python, no AI: TEWS calculation, emergency-sign matching, priority rules | `packages/scoring` |
-| **SATS rules** | The scoring tables as YAML, each line with its source and a `verified` flag | `sats/` |
+| **SATS rules** | The scoring tables as YAML, transcribed from the SATS Training Manual 2012, each line citing its page and figure | `sats/` |
 | **Postgres** | Patients, notes, vitals, proposals, flags, approvals, and the append-only audit log | `packages/db` |
 
 ## What is MCP, and what is it doing here?

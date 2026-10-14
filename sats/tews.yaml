@@ -1,93 +1,102 @@
-# SATS adult Triage Early Warning Score (TEWS) — DRAFT.
+# SATS adult Triage Early Warning Score (TEWS).
 #
-# Every value below is a draft and is marked `verified: false` until checked
-# line by line against the official SATS training manual (docs/reference/).
-# Do not treat these thresholds as clinical fact while unverified.
+# Source: The South African Triage Scale (SATS) Training Manual 2012, Western Cape Government
+# Health / South African Triage Group. Adult TEWS: manual page 26, Figure 14 "Adult TEWS (older
+# than 12 years)"; also on the Adult SATS Chart, page 9, Figure 4. Observation definitions: pages 26-27.
+# A copy of the manual: https://medbox.org/index.php/dl/610cf5bbe58a3f709b7a50d4
+# SATS materials are published under CC BY-NC-SA 3.0 (EMSSA); the manual is not redistributed here.
 #
-# Numeric bands use `lower` (inclusive) and `upper` (exclusive); a missing
-# bound means open-ended. Adult scale only (age >= 12). Paediatric TEWS is
+# `verified: true` means the entry was transcribed from the cited page and checked against it.
+# Band bounds mirror the manual's wording: `lt`/`gt` for "less than"/"more than", `min`/`max`
+# (inclusive) for ranges. RR, HR and SBP are whole numbers and are rounded before scoring.
+# Adult scale only: older than 12 years or taller than 150 cm (manual page 6). Paediatric TEWS is
 # out of scope.
 
 scale: SATS adult TEWS
 applies_to:
   min_age_years: 12
 
+_source: &tews { document: SATS Training Manual, edition: "2012 (Western Cape Government Health)", location: "p.26, Figure 14: Adult TEWS" }
+
 parameters:
   respiratory_rate:
     label: Respiratory rate
     unit: breaths/min
     kind: numeric
-    measured: true
+    integer: true
     plausible: { min: 4, max: 70 }
     bands:
-      - { id: tews.rr.lt9,    label: "< 9",    upper: 9,               points: 3, source: { document: SATS Training Manual, edition: "2012 (confirm)", location: "Adult TEWS table (page TODO)" }, verified: false }
-      - { id: tews.rr.9_14,   label: "9-14",   lower: 9,   upper: 15,  points: 0, source: { document: SATS Training Manual, edition: "2012 (confirm)", location: "Adult TEWS table (page TODO)" }, verified: false }
-      - { id: tews.rr.15_20,  label: "15-20",  lower: 15,  upper: 21,  points: 1, source: { document: SATS Training Manual, edition: "2012 (confirm)", location: "Adult TEWS table (page TODO)" }, verified: false }
-      - { id: tews.rr.21_29,  label: "21-29",  lower: 21,  upper: 30,  points: 2, source: { document: SATS Training Manual, edition: "2012 (confirm)", location: "Adult TEWS table (page TODO)" }, verified: false }
-      - { id: tews.rr.ge30,   label: ">= 30",  lower: 30,              points: 3, source: { document: SATS Training Manual, edition: "2012 (confirm)", location: "Adult TEWS table (page TODO)" }, verified: false }
+      - { id: tews.rr.lt9,   label: "less than 9",  lt: 9,           points: 2, source: *tews, verified: true }
+      - { id: tews.rr.9_14,  label: "9-14",  min: 9,  max: 14,       points: 0, source: *tews, verified: true }
+      - { id: tews.rr.15_20, label: "15-20", min: 15, max: 20,       points: 1, source: *tews, verified: true }
+      - { id: tews.rr.21_29, label: "21-29", min: 21, max: 29,       points: 2, source: *tews, verified: true }
+      - { id: tews.rr.gt29,  label: "more than 29", gt: 29,          points: 3, source: *tews, verified: true }
 
   heart_rate:
     label: Heart rate
     unit: beats/min
     kind: numeric
-    measured: true
+    integer: true
     plausible: { min: 20, max: 250 }
     bands:
-      - { id: tews.hr.lt41,    label: "< 41",    upper: 41,              points: 3, source: { document: SATS Training Manual, edition: "2012 (confirm)", location: "Adult TEWS table (page TODO)" }, verified: false }
-      - { id: tews.hr.41_50,   label: "41-50",   lower: 41,  upper: 51,  points: 1, source: { document: SATS Training Manual, edition: "2012 (confirm)", location: "Adult TEWS table (page TODO)" }, verified: false }
-      - { id: tews.hr.51_100,  label: "51-100",  lower: 51,  upper: 101, points: 0, source: { document: SATS Training Manual, edition: "2012 (confirm)", location: "Adult TEWS table (page TODO)" }, verified: false }
-      - { id: tews.hr.101_110, label: "101-110", lower: 101, upper: 111, points: 1, source: { document: SATS Training Manual, edition: "2012 (confirm)", location: "Adult TEWS table (page TODO)" }, verified: false }
-      - { id: tews.hr.111_129, label: "111-129", lower: 111, upper: 130, points: 2, source: { document: SATS Training Manual, edition: "2012 (confirm)", location: "Adult TEWS table (page TODO)" }, verified: false }
-      - { id: tews.hr.ge130,   label: ">= 130",  lower: 130,             points: 3, source: { document: SATS Training Manual, edition: "2012 (confirm)", location: "Adult TEWS table (page TODO)" }, verified: false }
+      - { id: tews.hr.lt41,    label: "less than 41",  lt: 41,         points: 2, source: *tews, verified: true }
+      - { id: tews.hr.41_50,   label: "41-50",   min: 41,  max: 50,    points: 1, source: *tews, verified: true }
+      - { id: tews.hr.51_100,  label: "51-100",  min: 51,  max: 100,   points: 0, source: *tews, verified: true }
+      - { id: tews.hr.101_110, label: "101-110", min: 101, max: 110,   points: 1, source: *tews, verified: true }
+      - { id: tews.hr.111_129, label: "111-129", min: 111, max: 129,   points: 2, source: *tews, verified: true }
+      - { id: tews.hr.gt129,   label: "more than 129", gt: 129,        points: 3, source: *tews, verified: true }
 
   systolic_bp:
     label: Systolic blood pressure
     unit: mmHg
     kind: numeric
-    measured: true
+    integer: true
     plausible: { min: 40, max: 300 }
     bands:
-      - { id: tews.sbp.lt71,    label: "< 71",    upper: 71,              points: 3, source: { document: SATS Training Manual, edition: "2012 (confirm)", location: "Adult TEWS table (page TODO)" }, verified: false }
-      - { id: tews.sbp.71_80,   label: "71-80",   lower: 71,  upper: 81,  points: 2, source: { document: SATS Training Manual, edition: "2012 (confirm)", location: "Adult TEWS table (page TODO)" }, verified: false }
-      - { id: tews.sbp.81_100,  label: "81-100",  lower: 81,  upper: 101, points: 1, source: { document: SATS Training Manual, edition: "2012 (confirm)", location: "Adult TEWS table (page TODO)" }, verified: false }
-      - { id: tews.sbp.101_199, label: "101-199", lower: 101, upper: 200, points: 0, source: { document: SATS Training Manual, edition: "2012 (confirm)", location: "Adult TEWS table (page TODO)" }, verified: false }
-      - { id: tews.sbp.ge200,   label: ">= 200",  lower: 200,             points: 2, source: { document: SATS Training Manual, edition: "2012 (confirm)", location: "Adult TEWS table (page TODO)" }, verified: false }
+      - { id: tews.sbp.lt71,    label: "less than 71",  lt: 71,        points: 3, source: *tews, verified: true }
+      - { id: tews.sbp.71_80,   label: "71-80",   min: 71,  max: 80,   points: 2, source: *tews, verified: true }
+      - { id: tews.sbp.81_100,  label: "81-100",  min: 81,  max: 100,  points: 1, source: *tews, verified: true }
+      - { id: tews.sbp.101_199, label: "101-199", min: 101, max: 199,  points: 0, source: *tews, verified: true }
+      - { id: tews.sbp.gt199,   label: "more than 199", gt: 199,       points: 2, source: *tews, verified: true }
 
   temperature:
     label: Temperature
     unit: "°C"
     kind: numeric
-    measured: true
     plausible: { min: 30, max: 44 }
+    # The manual also scores "Cold" / "Hot" by touch (2 points). Klaudesk scores only a
+    # measured temperature; an unmeasured temperature is treated as missing.
     bands:
-      - { id: tews.temp.lt35,    label: "< 35 (cold)",  upper: 35,               points: 2, source: { document: SATS Training Manual, edition: "2012 (confirm)", location: "Adult TEWS table (page TODO)" }, verified: false }
-      - { id: tews.temp.35_38_4, label: "35-38.4",      lower: 35,  upper: 38.5, points: 0, source: { document: SATS Training Manual, edition: "2012 (confirm)", location: "Adult TEWS table (page TODO)" }, verified: false }
-      - { id: tews.temp.ge38_5,  label: ">= 38.5 (hot)", lower: 38.5,           points: 2, source: { document: SATS Training Manual, edition: "2012 (confirm)", location: "Adult TEWS table (page TODO)" }, verified: false }
+      - { id: tews.temp.lt35,    label: "under 35°",  lt: 35,               points: 2, source: *tews, verified: true }
+      - { id: tews.temp.35_38_4, label: "35°-38.4°",  min: 35, max: 38.4,   points: 0, source: *tews, verified: true }
+      - { id: tews.temp.gt38_4,  label: "over 38.4°", gt: 38.4,             points: 2, source: *tews, verified: true }
 
   avpu:
     label: Level of consciousness (AVPU)
     kind: categorical
     measured: false
     bands:
-      - { id: tews.avpu.alert,        value: alert,        label: Alert,                 points: 0, source: { document: SATS Training Manual, edition: "2012 (confirm)", location: "Adult TEWS table (page TODO)" }, verified: false }
-      - { id: tews.avpu.confused,     value: confused,     label: New confusion,         points: 1, source: { document: SATS Training Manual, edition: "2012 (confirm)", location: "Adult TEWS table (page TODO)" }, verified: false }
-      - { id: tews.avpu.voice,        value: voice,        label: Reacts to voice,       points: 1, source: { document: SATS Training Manual, edition: "2012 (confirm)", location: "Adult TEWS table (page TODO)" }, verified: false }
-      - { id: tews.avpu.pain,         value: pain,         label: Reacts to pain,        points: 2, source: { document: SATS Training Manual, edition: "2012 (confirm)", location: "Adult TEWS table (page TODO)" }, verified: false }
-      - { id: tews.avpu.unresponsive, value: unresponsive, label: Unresponsive,          points: 3, source: { document: SATS Training Manual, edition: "2012 (confirm)", location: "Adult TEWS table (page TODO)" }, verified: false }
+      - { id: tews.avpu.alert,        value: alert,        label: Alert,            points: 0, source: *tews, verified: true }
+      - { id: tews.avpu.confused,     value: confused,     label: Confused,         points: 2, source: *tews, verified: true }
+      - { id: tews.avpu.voice,        value: voice,        label: Reacts to voice,  points: 1, source: *tews, verified: true }
+      - { id: tews.avpu.pain,         value: pain,         label: Reacts to pain,   points: 2, source: *tews, verified: true }
+      - { id: tews.avpu.unresponsive, value: unresponsive, label: Unresponsive,     points: 3, source: *tews, verified: true }
 
   mobility:
     label: Mobility
     kind: categorical
     measured: false
+    # p.27: a patient in a wheelchair due to permanent paralysis scores 2 (stretcher/immobile).
     bands:
-      - { id: tews.mob.walking,   value: walking,   label: Walking,                 points: 0, source: { document: SATS Training Manual, edition: "2012 (confirm)", location: "Adult TEWS table (page TODO)" }, verified: false }
-      - { id: tews.mob.with_help, value: with_help, label: With help,               points: 1, source: { document: SATS Training Manual, edition: "2012 (confirm)", location: "Adult TEWS table (page TODO)" }, verified: false }
-      - { id: tews.mob.stretcher, value: stretcher, label: Stretcher / immobile,    points: 2, source: { document: SATS Training Manual, edition: "2012 (confirm)", location: "Adult TEWS table (page TODO)" }, verified: false }
+      - { id: tews.mob.walking,   value: walking,   label: Walking,              points: 0, source: *tews, verified: true }
+      - { id: tews.mob.with_help, value: with_help, label: With help,            points: 1, source: *tews, verified: true }
+      - { id: tews.mob.stretcher, value: stretcher, label: Stretcher / immobile, points: 2, source: *tews, verified: true }
 
   trauma:
     label: Trauma
     kind: categorical
     measured: false
+    # p.27: "Trauma is present if there is ANY injury to the patient within the past 48 hours."
     bands:
-      - { id: tews.trauma.no,  value: "no",  label: No trauma, points: 0, source: { document: SATS Training Manual, edition: "2012 (confirm)", location: "Adult TEWS table (page TODO)" }, verified: false }
-      - { id: tews.trauma.yes, value: "yes", label: Trauma,    points: 1, source: { document: SATS Training Manual, edition: "2012 (confirm)", location: "Adult TEWS table (page TODO)" }, verified: false }
+      - { id: tews.trauma.no,  value: "no",  label: No,  points: 0, source: *tews, verified: true }
+      - { id: tews.trauma.yes, value: "yes", label: Yes, points: 1, source: *tews, verified: true }

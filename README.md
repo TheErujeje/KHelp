@@ -93,7 +93,7 @@ Port 80 must be free. To use another port, change `"80:80"` under `web` in `dock
 ### Run the tests
 
 ```bash
-uv sync && uv run pytest           # 91 tests: scoring, server-side proposal checks, model settings
+uv sync && uv run pytest           # 103 tests: scoring (against the manual), proposal checks, model settings
 ```
 
 ### Run one note from the command line (no web UI)
@@ -162,23 +162,30 @@ and are applied within a minute of a change, with no redeploy. Deployment: [depl
   `data/synthetic/patients.json`: 30 messy notes with abbreviations, Pidgin, missing vitals,
   Fahrenheit, odd BP formats, typos, children under 12, a request for a diagnosis, and a
   "put him in front, he's my brother" request. No real patient data is used anywhere.
-- **Triage scale:** the South African Triage Scale (SATS): adult TEWS and emergency signs, from the
-  SATS training manual. The rules are in `sats/*.yaml`; every entry carries a `source` (document,
-  edition, page/table) and a `verified` flag. SATS belongs to its authors; the manual is not
-  redistributed in this repository.
+- **Triage scale:** the South African Triage Scale (SATS), adult version, transcribed from **The South
+  African Triage Scale (SATS) Training Manual 2012** (Western Cape Government Health and the South
+  African Triage Group): adult TEWS from p.26 Figure 14, the TEWS-to-priority rule from p.6 Figure 2
+  and the Adult SATS Chart (p.8-9), and the adult emergency, very urgent and urgent signs from p.12-13.
+  Every entry in `sats/*.yaml` names its page and figure, and every proposal shows those references
+  to the nurse. SATS resources are published by EMSSA under CC BY-NC-SA 3.0; the manual is not
+  redistributed here. Where to get it, its checksum and the page map: [docs/reference/README.md](docs/reference/README.md).
 
 ## What is unfinished (read this)
 
-- **The SATS rule values are unverified drafts.** Every entry in `sats/*.yaml` is `verified: false`,
-  with its page reference still to be filled in, until it has been checked line by line against
-  the official manual. The UI shows an **UNVERIFIED RULES** banner while any entry is unverified.
-  `uv run python -m khelp_scoring.unverified` lists them.
+- **SATS values were transcribed by hand from the 2012 manual** and tested against it (`sats/*.yaml`,
+  tests in `packages/scoring/tests`). A clinician should still review the transcription before any
+  real use. The manual also lets a nurse score temperature by touch ("cold"/"hot"); Klaudesk scores
+  only a measured temperature.
 - **Adults only.** Paediatric SATS is out of scope. Patients under 12, or with no age written, are
   flagged for manual triage and never scored with the adult scale.
-- **The Pidgin and abbreviation phrase lists are drafts** and need review by Pidgin-speaking nurses.
+- **The phrase lists that recognise each sign** (English synonyms, abbreviations, Nigerian Pidgin) are
+  Klaudesk's own drafts, not from the manual, and need review by Nigerian triage nurses. So does the
+  mapping of pain scores (5-7/10 moderate, 8-10/10 severe).
 - **Emergency-sign matching is keyword based.** It handles negation within a clause ("no SOB") but
   can miss unusual phrasing; the nurse can always override.
-- **Low oxygen saturation** is recorded but is not yet an emergency sign in the draft rules.
+- **Additional investigations** from the adult chart (e.g. "if RR scores 1 point or more, check SpO2
+  and hand over to a senior clinician") are not yet prompted. SpO2 is recorded but, as in the manual,
+  is not itself an adult emergency sign.
 - **Demo sign-in only**: no real accounts. A hospital deployment would use its own staff login.
 - **The live demo** uses a hosted model until the GPU instance is approved.
 - **Smaller models need correcting.** 3B–7B models often get the priority wrong on the first try;

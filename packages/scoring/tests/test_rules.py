@@ -19,14 +19,26 @@ def test_ids_are_unique():
     assert len(ids) == len(set(ids))
 
 
-def test_numeric_bands_are_contiguous():
+def test_numeric_bands_cover_every_value_exactly_once():
+    from khelp_scoring.tews import band_contains
     for name, spec in load_rules().parameters.items():
         if spec["kind"] != "numeric":
             continue
-        bands = spec["bands"]
-        assert "lower" not in bands[0] and "upper" not in bands[-1], name
-        for a, b in zip(bands, bands[1:]):
-            assert a["upper"] == b["lower"], f"{name}: gap between {a['id']} and {b['id']}"
+        lo, hi = spec["plausible"]["min"], spec["plausible"]["max"]
+        step = 1 if spec.get("integer") else 0.01
+        value = lo
+        while value <= hi:
+            hits = [b["id"] for b in spec["bands"] if band_contains(b, round(value, 2))]
+            assert len(hits) == 1, f"{name}={value}: {hits}"
+            value += step
+
+
+def test_all_sats_entries_cite_a_manual_page():
+    for entry in load_rules().all_entries():
+        if entry.get("kind") == "project_rule":
+            continue
+        assert entry["verified"] is True, entry["id"]
+        assert entry["source"]["location"].startswith("p."), entry["id"]
 
 
 def test_unverified_rules_report():
