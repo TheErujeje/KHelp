@@ -1,5 +1,5 @@
 [Unit]
-Description=KHelp: apply settings from SSM Parameter Store
+Description=Klaudesk: apply settings from SSM Parameter Store
 After=docker.service network-online.target
 Wants=network-online.target
 

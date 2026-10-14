@@ -1,5 +1,5 @@
 #!/usr/bin/env bash
-# Ship the committed code to an instance and start KHelp.
+# Ship the committed code to an instance and start Klaudesk.
 #
 #   ENV_SSM_PARAM=/khelp/prod/env deploy/remote-deploy.sh ubuntu@<ip> ~/.ssh/<key>.pem
 #

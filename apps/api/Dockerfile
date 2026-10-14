@@ -1,4 +1,4 @@
-# KHelp API + agent runner. Build from the repo root:
+# Klaudesk API + agent runner. Build from the repo root:
 #   docker build -f apps/api/Dockerfile .
 FROM node:22-bookworm-slim AS node
 

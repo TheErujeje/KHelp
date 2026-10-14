@@ -1,5 +1,5 @@
 #!/usr/bin/env bash
-# Launch an EC2 instance for KHelp and print its address.
+# Launch an EC2 instance for Klaudesk and print its address.
 #
 #   AWS_PROFILE=... AWS_REGION=eu-west-1 KEY_NAME=... SECURITY_GROUP=sg-... deploy/launch-ec2.sh
 #   INSTANCE_TYPE=t3.small ... deploy/launch-ec2.sh       # no GPU: model on Groq or a remote Ollama

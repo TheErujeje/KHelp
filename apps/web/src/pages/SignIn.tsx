@@ -37,8 +37,8 @@ export default function SignIn() {
             <Stethoscope size={22} />
           </div>
           <div>
-            <div className="text-lg font-bold">KHelp</div>
-            <div className="text-xs text-sidebar-text">Triage Desk</div>
+            <div className="text-lg font-bold">Klaudesk</div>
+            <div className="text-xs text-sidebar-text">OPD triage desk</div>
           </div>
         </div>
 
@@ -71,7 +71,7 @@ export default function SignIn() {
         <div className="w-full max-w-sm">
           <div className="mb-8 flex items-center gap-2 lg:hidden">
             <div className="flex h-9 w-9 items-center justify-center rounded-xl bg-brand text-white"><Stethoscope size={20} /></div>
-            <span className="text-lg font-bold">KHelp Triage Desk</span>
+            <span className="text-lg font-bold">Klaudesk</span>
           </div>
           <h2 className="text-2xl font-bold">Sign in to the desk</h2>
           <p className="mt-1 text-sm text-ink-2">Your name is recorded on every priority you approve.</p>

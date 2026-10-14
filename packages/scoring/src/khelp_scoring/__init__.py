@@ -1,4 +1,4 @@
-"""Deterministic SATS scoring for KHelp. No model calls live here."""
+"""Deterministic SATS scoring for Klaudesk. No model calls live here."""
 
 from .discriminators import DiscriminatorMatch, lookup_discriminators
 from .priority import Decision, decide, tews_priority_rule

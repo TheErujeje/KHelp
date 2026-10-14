@@ -1,4 +1,4 @@
-// Typed client for the KHelp API, plus TanStack Query hooks.
+// Typed client for the Klaudesk API, plus TanStack Query hooks.
 
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 

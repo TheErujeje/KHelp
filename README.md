@@ -1,4 +1,4 @@
-# KHelp: Triage Desk
+# Klaudesk
 
 An agent that helps a triage nurse in a busy public-hospital outpatient department (OPD) in Nigeria.
 The nurse types the presenting complaint and vitals the way they go on the case card (abbreviated,
@@ -15,7 +15,7 @@ It never diagnoses, never prescribes, and never changes the queue by itself.
 
 ## Try the live demo
 
-**http://34.249.188.205**
+**http://34.251.228.91**
 
 Sign in with any name (demo sign-in, no password check). Then either press **Score** on one of the
 synthetic patients waiting on the dashboard, or open **Triage desk**, pick a sample note (or type

@@ -30,7 +30,7 @@ def _print_event(event: dict) -> None:
 
 def main() -> None:
     load_dotenv()
-    parser = argparse.ArgumentParser(description="Run the KHelp triage agent on one synthetic note")
+    parser = argparse.ArgumentParser(description="Run the Klaudesk triage agent on one synthetic note")
     parser.add_argument("note_file", nargs="?", type=Path)
     parser.add_argument("--text", help="note text instead of a file")
     parser.add_argument("--name", default="Synthetic CLI patient")

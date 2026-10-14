@@ -18,5 +18,5 @@ tews_to_priority:
 missing_inputs:
   id: prio.missing_inputs
   propose_with_missing_at_or_above: ORANGE
-  source: { document: KHelp project rule, edition: "n/a", location: "README: Missing vitals" }
+  source: { document: Klaudesk project rule, edition: "n/a", location: "README: Missing vitals" }
   verified: false

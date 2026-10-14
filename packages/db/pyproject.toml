@@ -1,7 +1,7 @@
 [project]
 name = "khelp-db"
 version = "0.1.0"
-description = "KHelp Postgres models, sessions and Alembic migrations"
+description = "Klaudesk Postgres models, sessions and Alembic migrations"
 requires-python = ">=3.11"
 license = "Apache-2.0"
 dependencies = ["sqlalchemy>=2.0,<2.2", "psycopg[binary]>=3.2", "alembic>=1.13"]

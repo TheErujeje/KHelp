@@ -1,4 +1,4 @@
-"""KHelp API.
+"""Klaudesk API.
 
     uv run khelp-api        # http://localhost:8000/api/...
 """
@@ -35,7 +35,7 @@ async def lifespan(_: FastAPI):
     yield
 
 
-app = FastAPI(title="KHelp", version="0.1.0", lifespan=lifespan, docs_url="/api/docs",
+app = FastAPI(title="Klaudesk", version="0.1.0", lifespan=lifespan, docs_url="/api/docs",
               openapi_url="/api/openapi.json")
 meta = APIRouter()
 

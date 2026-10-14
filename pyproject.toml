@@ -1,7 +1,7 @@
 [project]
 name = "khelp"
 version = "0.1.0"
-description = "KHelp: a cited SATS triage-priority assistant for outpatient triage desks"
+description = "Klaudesk: a cited SATS triage-priority assistant for outpatient triage desks"
 requires-python = ">=3.11"
 license = "Apache-2.0"
 dependencies = ["khelp-scoring", "khelp-db", "khelp-triage-tools", "khelp-api"]

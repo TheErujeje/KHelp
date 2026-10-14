@@ -1,6 +1,6 @@
-# How KHelp works
+# How Klaudesk works
 
-A plain walk-through of what happens when a nurse uses KHelp, and what each part is for.
+A plain walk-through of what happens when a nurse uses Klaudesk, and what each part is for.
 
 ## The one-sentence version
 
@@ -28,7 +28,7 @@ publishes a list of tools — each with a name, a description and typed inputs �
 agent can discover and call them. Think of it like a USB socket for tools: the agent does not need to
 know how a tool works inside, only what it is called and what it takes.
 
-In KHelp the agent has **no abilities of its own** beyond reading text and choosing which tool to call.
+In Klaudesk the agent has **no abilities of its own** beyond reading text and choosing which tool to call.
 Everything it can *do* comes through two MCP servers:
 
 1. **triage-tools (ours)** — five tools:

@@ -1,7 +1,7 @@
 [project]
 name = "khelp-api"
 version = "0.1.0"
-description = "KHelp API and agent runner"
+description = "Klaudesk API and agent runner"
 requires-python = ">=3.11"
 license = "Apache-2.0"
 dependencies = [

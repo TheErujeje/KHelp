@@ -24,7 +24,7 @@ function Sidebar({ onNavigate }: { onNavigate?: () => void }) {
       <div className="flex items-center gap-2.5 border-b border-white/10 px-5 py-5">
         <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-brand text-white"><Stethoscope size={18} /></div>
         <div>
-          <div className="text-sm font-bold text-white">KHelp</div>
+          <div className="text-sm font-bold text-white">Klaudesk</div>
           <div className="text-[11px] text-sidebar-text">Triage Desk · OPD</div>
         </div>
       </div>
@@ -88,7 +88,7 @@ export default function Layout() {
       <div className="flex min-w-0 flex-1 flex-col overflow-hidden">
         <div className="flex items-center gap-3 border-b border-line bg-white px-4 py-3 lg:hidden">
           <button onClick={() => setOpen(true)} className="text-ink-2" aria-label="Open menu"><Menu size={20} /></button>
-          <span className="text-sm font-bold">KHelp Triage Desk</span>
+          <span className="text-sm font-bold">Klaudesk</span>
         </div>
         <RulesBanner />
         <main className="flex-1 overflow-y-auto p-4 sm:p-6">

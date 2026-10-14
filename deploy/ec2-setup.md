@@ -1,4 +1,4 @@
-# Deploying KHelp to one EC2 instance
+# Deploying Klaudesk to one EC2 instance
 
 **Quick path, from your machine** (what the live demo uses):
 

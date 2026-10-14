@@ -1,4 +1,4 @@
-# KHelp: one command.
+# Klaudesk: one command.
 #
 #   cp .env.example .env            # set passwords and the model
 #   docker compose up -d --build                         # model on Groq or a remote Ollama
