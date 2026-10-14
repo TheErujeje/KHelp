@@ -1,35 +1,30 @@
 #!/usr/bin/env bash
 # Ship the committed code to an instance and start KHelp.
 #
-#   deploy/remote-deploy.sh ubuntu@<ip> ~/.ssh/<key>.pem                      # self-hosted model on the GPU
-#   PROVIDER=groq GROQ_API_KEY=... deploy/remote-deploy.sh ubuntu@<ip> key.pem # Groq (synthetic data only)
+#   ENV_SSM_PARAM=/khelp/prod/env deploy/remote-deploy.sh ubuntu@<ip> ~/.ssh/<key>.pem
 #
-# Copies `git archive HEAD` (committed files only, never .env). On first deploy it creates
-# /opt/khelp/.env with random database passwords. Re-running redeploys HEAD and keeps .env and data;
-# PROVIDER/KHELP_MODEL/GROQ_API_KEY given on a re-run update the model settings.
+# Settings come from one SSM SecureString parameter holding a JSON object of environment
+# variables (see deploy/ec2-setup.md). The instance fetches it with its own IAM role and writes
+# /opt/khelp/.env (mode 600); secrets never pass through the machine running this script.
+#
+# Which services start follows the settings:
+#   KHELP_MODEL_PROVIDER=groq                                   app only
+#   KHELP_MODEL_PROVIDER=ollama, OLLAMA_BASE_URL=http://ollama:11434   app + Ollama on this GPU box
+#   KHELP_MODEL_PROVIDER=ollama, OLLAMA_BASE_URL=<other host>    app only, model on another box
+#
+# Copies `git archive HEAD` (committed files only). Re-running redeploys HEAD; data volumes are kept.
 set -euo pipefail
 
 HOST="${1:?usage: remote-deploy.sh user@host key.pem}"
 KEY="${2:?usage: remote-deploy.sh user@host key.pem}"
-PROVIDER="${PROVIDER:-ollama}"
-if [ "$PROVIDER" = "groq" ]; then
-  MODEL="${KHELP_MODEL:-openai/gpt-oss-120b}"
-  : "${GROQ_API_KEY:?PROVIDER=groq needs GROQ_API_KEY}"
-else
-  MODEL="${KHELP_MODEL:-qwen2.5:14b-instruct}"
-fi
+: "${ENV_SSM_PARAM:?set ENV_SSM_PARAM, e.g. /khelp/prod/env}"
 SSH=(ssh -i "$KEY" -o StrictHostKeyChecking=accept-new "$HOST")
 
 cd "$(git rev-parse --show-toplevel)"
-echo "Shipping $(git rev-parse --short HEAD) to $HOST (provider $PROVIDER, model $MODEL)"
+echo "Shipping $(git rev-parse --short HEAD) to $HOST (settings from $ENV_SSM_PARAM)"
 git archive --format=tar HEAD | "${SSH[@]}" "sudo mkdir -p /opt/khelp && sudo chown \$USER /opt/khelp && tar -x -C /opt/khelp"
 
-# The API key travels over SSH stdin into a 600 file; it never appears in a command line.
-if [ "$PROVIDER" = "groq" ]; then
-  printf '%s' "$GROQ_API_KEY" | "${SSH[@]}" "umask 077 && cat > /opt/khelp/.groq_key"
-fi
-
-"${SSH[@]}" PROVIDER="$PROVIDER" MODEL="$MODEL" bash -s <<'REMOTE'
+"${SSH[@]}" ENV_SSM_PARAM="$ENV_SSM_PARAM" bash -s <<'REMOTE'
 set -euo pipefail
 cd /opt/khelp
 
@@ -39,6 +34,9 @@ fi
 if ! sudo docker compose version >/dev/null 2>&1; then
   sudo apt-get update -qq && sudo apt-get install -y -qq docker-compose-plugin
 fi
+if ! command -v aws >/dev/null 2>&1; then
+  sudo snap install aws-cli --classic >/dev/null
+fi
 
 # Small instances: swap so image builds never run out of memory.
 if [ "$(awk '/MemTotal/ {print $2}' /proc/meminfo)" -lt 3500000 ] && ! swapon --show | grep -q swapfile; then
@@ -46,32 +44,38 @@ if [ "$(awk '/MemTotal/ {print $2}' /proc/meminfo)" -lt 3500000 ] && ! swapon --
   echo '/swapfile none swap sw 0 0' | sudo tee -a /etc/fstab >/dev/null
 fi
 
-if [ ! -f .env ]; then
-  cp .env.example .env
-  sed -i "s/^POSTGRES_PASSWORD=.*/POSTGRES_PASSWORD=$(openssl rand -hex 16)/" .env
-  sed -i "s/^MCP_DB_PASSWORD=.*/MCP_DB_PASSWORD=$(openssl rand -hex 16)/" .env
-  chmod 600 .env
-  echo "created .env"
-fi
+# Render .env from the SSM parameter (instance role; region from instance metadata).
+REGION=$(TOKEN=$(curl -sX PUT http://169.254.169.254/latest/api/token -H "X-aws-ec2-metadata-token-ttl-seconds: 60") \
+  && curl -s -H "X-aws-ec2-metadata-token: $TOKEN" http://169.254.169.254/latest/meta-data/placement/region)
+umask 077
+aws ssm get-parameter --region "$REGION" --name "$ENV_SSM_PARAM" --with-decryption \
+  --query Parameter.Value --output text \
+  | python3 -c '
+import json, sys
+env = json.load(sys.stdin)
+for key, value in env.items():
+    value = str(value)
+    if "\n" in value or not key.replace("_", "").isalnum():
+        sys.exit(f"invalid entry {key!r}")
+    print(f"{key}={value}")
+' > .env.new
+mv .env.new .env
+echo "wrote .env ($(wc -l < .env) settings)"
 
-setvar() {  # setvar KEY VALUE: replace or append in .env
-  if grep -qE "^#? ?$1=" .env; then sed -i "s|^#\? \?$1=.*|$1=$2|" .env; else echo "$1=$2" >> .env; fi
-}
-setvar KHELP_MODEL_PROVIDER "$PROVIDER"
-setvar KHELP_MODEL "$MODEL"
-if [ "$PROVIDER" = "groq" ]; then
-  setvar GROQ_API_KEY "$(cat .groq_key)"
-  setvar KHELP_REASONING_EFFORT low
-  rm -f .groq_key
-  COMPOSE=(sudo docker compose)
-else
-  setvar OLLAMA_BASE_URL http://ollama:11434
+get() { grep -E "^$1=" .env | head -1 | cut -d= -f2-; }
+PROVIDER=$(get KHELP_MODEL_PROVIDER)
+if [ "$PROVIDER" = "ollama" ] && [ "$(get OLLAMA_BASE_URL)" = "http://ollama:11434" ]; then
   nvidia-smi --query-gpu=name,memory.total --format=csv,noheader
   COMPOSE=(sudo docker compose -f docker-compose.yml -f deploy/compose.gpu.yml --profile local-model)
+  LOCAL_MODEL=1
+else
+  COMPOSE=(sudo docker compose)
+  LOCAL_MODEL=0
 fi
+echo "model: $PROVIDER $(get KHELP_MODEL)"
 
-"${COMPOSE[@]}" up -d --build
-if [ "$PROVIDER" != "groq" ]; then
+"${COMPOSE[@]}" up -d --build --remove-orphans
+if [ "$LOCAL_MODEL" = 1 ]; then
   echo "waiting for the model download (first deploy only)..."
   "${COMPOSE[@]}" logs -f ollama-pull 2>/dev/null | grep -m1 -E "success|Error" || true
 fi
