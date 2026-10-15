@@ -41,6 +41,8 @@ log = logging.getLogger(__name__)
 FILESYSTEM_SERVER = "@modelcontextprotocol/server-filesystem@1.0.0"
 REPO_ROOT = Path(__file__).resolve().parents[5]
 MAX_NUDGES = 2
+NUDGE_RECHECK = ("You have not finished the re-check. Call compute_tews with the new vitals now, then decide "
+                 "whether to raise a DETERIORATION flag as instructed.")
 NUDGE = ("You have not finished. Make the next tool call now: propose_priority, or request_recheck if a "
          "previous error told you to. Do not reply with text until a tool has returned ok=true.")
 
@@ -207,9 +209,9 @@ def _has_action(run_id: str) -> bool:
                     or s.scalars(select(RecheckFlag.id).where(RecheckFlag.run_id == run_id)).first())
 
 
-def _audit_nudge(run_id: str, patient_id: int, model: str, last_message: str) -> None:
+def _audit_nudge(run_id: str, patient_id: int, model: str, last_message: str, nudge: str) -> None:
     with session_factory()() as s, s.begin():
-        _audit(s, run_id, patient_id, "NUDGE", {"last_message": last_message[:1000], "nudge": NUDGE}, model)
+        _audit(s, run_id, patient_id, "NUDGE", {"last_message": last_message[:1000], "nudge": nudge}, model)
 
 
 def run_agent(patient_id: int, intake_id: int, kind: str = "INITIAL", settings: Settings | None = None,
@@ -254,11 +256,16 @@ def run_agent(patient_id: int, intake_id: int, kind: str = "INITIAL", settings: 
                 # Small models sometimes announce the next step and stop. Nudge
                 # them, a bounded number of times, to actually make the call.
                 for _ in range(MAX_NUDGES):
-                    if (kind != "INITIAL" or timed_out.is_set() or hooks.limit_hit
-                            or result.stop_reason == "cancelled" or _has_action(run_id)):
+                    if timed_out.is_set() or hooks.limit_hit or result.stop_reason == "cancelled":
                         break
-                    _audit_nudge(run_id, patient_id, settings.model_label, str(result))
-                    result = agent(NUDGE)
+                    if kind == "INITIAL" and not _has_action(run_id):
+                        nudge = NUDGE
+                    elif kind == "RECHECK" and "compute_tews" not in hooks.tools_called:
+                        nudge = NUDGE_RECHECK  # a re-check that never scored the new vitals is not finished
+                    else:
+                        break
+                    _audit_nudge(run_id, patient_id, settings.model_label, str(result), nudge)
+                    result = agent(nudge)
             finally:
                 timer.cancel()
             final_message = str(result).strip()[:2000]

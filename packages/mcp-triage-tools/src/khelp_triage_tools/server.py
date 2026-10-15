@@ -205,14 +205,14 @@ def propose_priority(
 def request_recheck(
     patient_id: int,
     reason: str,
-    flag_type: str = "MISSING_VITALS",
+    flag_type: str = "",
     new_vitals: dict[str, Any] | None = None,
 ) -> dict[str, Any]:
     """Raise a PENDING re-check flag for a human to look at. Does NOT change the queue.
 
-    flag_type: MISSING_VITALS (required vitals missing or implausible),
+    flag_type (required): MISSING_VITALS (required vitals missing or implausible),
     DETERIORATION (re-assessment is worse), MANUAL_TRIAGE (patient under 12
-    or age unknown), or OTHER. If `new_vitals` is given, TEWS is computed and
+    or age unknown), or OTHER. There is no default: say which one. If `new_vitals` is given, TEWS is computed and
     compared with the patient's previous reading.
     """
     inputs = {"patient_id": patient_id, "reason": reason, "flag_type": flag_type, "new_vitals": new_vitals}
@@ -220,8 +220,9 @@ def request_recheck(
     def run(s: Session) -> dict[str, Any]:
         ftype = (flag_type or "").strip().upper()
         if ftype not in FLAG_TYPES:
-            return _fail("INVALID_FLAG_TYPE", f"flag_type {flag_type!r} is not allowed",
-                         f"Use one of {', '.join(FLAG_TYPES)}.")
+            # No silent default: a wrong flag type mislabels how urgent the human check is.
+            return _fail("INVALID_FLAG_TYPE", f"flag_type {flag_type!r} is missing or not allowed",
+                         f"Call request_recheck again with flag_type set to one of {', '.join(FLAG_TYPES)}.")
         if not (reason or "").strip():
             return _fail("MISSING_REASON", "reason is empty", "Say what needs re-checking and why.")
         if data.get_patient(s, patient_id) is None:

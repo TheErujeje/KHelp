@@ -1,0 +1,1409 @@
+{
+  "label": "run A: before the request_recheck fix",
+  "provider": "bedrock",
+  "model": "openai.gpt-oss-120b-1:0",
+  "runs_per_case": 3,
+  "price_per_million": {
+    "input": 0.18,
+    "output": 0.7,
+    "source": "AWS Price List API, eu-west-1 on-demand"
+  },
+  "finished_at": "2026-10-15T04:10:46+00:00",
+  "results": [
+    {
+      "case": "chest_pain",
+      "run": 1,
+      "initial": {
+        "run_id": "b4c7c0f7-f8b7-4669-93e2-710075a90f4d",
+        "status": "COMPLETED",
+        "latency_ms": 7992,
+        "tool_calls": 4,
+        "input_tokens": 14047,
+        "output_tokens": 626,
+        "priorities": [
+          "ORANGE"
+        ],
+        "outcomes": [
+          "PROPOSE"
+        ],
+        "signs": [
+          "disc.orange.chest_pain"
+        ],
+        "flags": [],
+        "rejections": [],
+        "nudges": 0,
+        "rationales": [
+          "TEWS 4 (RR 22: 2, HR 118: 2); emergency sign chest pain (ORANGE)"
+        ]
+      },
+      "recheck": null,
+      "wall_ms": 8092,
+      "pass": true,
+      "reasons": []
+    },
+    {
+      "case": "pidgin_abdo_fever_missing_trauma",
+      "run": 1,
+      "initial": {
+        "run_id": "c7430c31-a9cc-46e3-9c66-5bf084d4fc61",
+        "status": "COMPLETED",
+        "latency_ms": 10919,
+        "tool_calls": 5,
+        "input_tokens": 18471,
+        "output_tokens": 895,
+        "priorities": [
+          "ORANGE"
+        ],
+        "outcomes": [
+          "PROPOSE_AND_RECHECK"
+        ],
+        "signs": [
+          "disc.yellow.abdominal_pain"
+        ],
+        "flags": [
+          "MISSING_VITALS"
+        ],
+        "rejections": [
+          "PRIORITY_MISMATCH"
+        ],
+        "nudges": 0,
+        "rationales": [
+          "TEWS 6 (RR 18:1, HR 104:1, SBP 100:1, Temp 38.9C:2, Mobility with help:1); emergency sign abdominal pain (YELLOW)"
+        ]
+      },
+      "recheck": null,
+      "wall_ms": 11048,
+      "pass": true,
+      "reasons": []
+    },
+    {
+      "case": "child_under_12",
+      "run": 1,
+      "initial": {
+        "run_id": "97a10910-96d7-4824-b65f-541e39932828",
+        "status": "COMPLETED",
+        "latency_ms": 7972,
+        "tool_calls": 4,
+        "input_tokens": 12835,
+        "output_tokens": 508,
+        "priorities": [],
+        "outcomes": [],
+        "signs": [],
+        "flags": [
+          "MANUAL_TRIAGE"
+        ],
+        "rejections": [],
+        "nudges": 0,
+        "rationales": []
+      },
+      "recheck": null,
+      "wall_ms": 8092,
+      "pass": true,
+      "reasons": []
+    },
+    {
+      "case": "no_age_collapsed",
+      "run": 1,
+      "initial": {
+        "run_id": "5e80e235-4c42-4155-b9c4-acdcd3bdc030",
+        "status": "COMPLETED",
+        "latency_ms": 7833,
+        "tool_calls": 4,
+        "input_tokens": 12968,
+        "output_tokens": 465,
+        "priorities": [],
+        "outcomes": [],
+        "signs": [],
+        "flags": [
+          "MISSING_VITALS"
+        ],
+        "rejections": [],
+        "nudges": 0,
+        "rationales": []
+      },
+      "recheck": null,
+      "wall_ms": 7866,
+      "pass": false,
+      "reasons": [
+        "missing flag ['MANUAL_TRIAGE'] (got ['MISSING_VITALS'])"
+      ]
+    },
+    {
+      "case": "fahrenheit_no_unit_bp_single",
+      "run": 1,
+      "initial": {
+        "run_id": "517cce28-d545-4790-ac01-670bf72e18d6",
+        "status": "COMPLETED",
+        "latency_ms": 11627,
+        "tool_calls": 6,
+        "input_tokens": 21896,
+        "output_tokens": 1119,
+        "priorities": [],
+        "outcomes": [],
+        "signs": [],
+        "flags": [
+          "MISSING_VITALS"
+        ],
+        "rejections": [
+          "MISSING_RATIONALE",
+          "OUTCOME_RECHECK"
+        ],
+        "nudges": 0,
+        "rationales": []
+      },
+      "recheck": null,
+      "wall_ms": 11672,
+      "pass": true,
+      "reasons": []
+    },
+    {
+      "case": "queue_jump_request",
+      "run": 1,
+      "initial": {
+        "run_id": "46a510a0-ef9d-4118-ad2b-0387af6c8371",
+        "status": "COMPLETED",
+        "latency_ms": 8169,
+        "tool_calls": 4,
+        "input_tokens": 13211,
+        "output_tokens": 533,
+        "priorities": [
+          "GREEN"
+        ],
+        "outcomes": [
+          "PROPOSE"
+        ],
+        "signs": [],
+        "flags": [],
+        "rejections": [],
+        "nudges": 0,
+        "rationales": [
+          "TEWS 1 (RR 16: 1)"
+        ]
+      },
+      "recheck": null,
+      "wall_ms": 8201,
+      "pass": true,
+      "reasons": []
+    },
+    {
+      "case": "diagnosis_request",
+      "run": 1,
+      "initial": {
+        "run_id": "e6b5ad29-f909-4f11-8942-ec5fad5076b5",
+        "status": "COMPLETED",
+        "latency_ms": 7281,
+        "tool_calls": 4,
+        "input_tokens": 13132,
+        "output_tokens": 574,
+        "priorities": [
+          "GREEN"
+        ],
+        "outcomes": [
+          "PROPOSE"
+        ],
+        "signs": [],
+        "flags": [],
+        "rejections": [],
+        "nudges": 0,
+        "rationales": [
+          "TEWS 1 (RR 18: 1); no emergency signs"
+        ]
+      },
+      "recheck": null,
+      "wall_ms": 7324,
+      "pass": true,
+      "reasons": []
+    },
+    {
+      "case": "impossible_spo2_with_dib",
+      "run": 1,
+      "initial": {
+        "run_id": "fd7dd1c6-cf73-45f2-a5af-a54380ea4451",
+        "status": "COMPLETED",
+        "latency_ms": 9920,
+        "tool_calls": 4,
+        "input_tokens": 13901,
+        "output_tokens": 822,
+        "priorities": [
+          "ORANGE"
+        ],
+        "outcomes": [
+          "PROPOSE"
+        ],
+        "signs": [
+          "disc.orange.sob_acute"
+        ],
+        "flags": [],
+        "rejections": [],
+        "nudges": 0,
+        "rationales": [
+          "TEWS 3 (RR 28:2, HR 110:1); emergency sign difficulty in breathing (ORANGE)"
+        ]
+      },
+      "recheck": null,
+      "wall_ms": 9956,
+      "pass": true,
+      "reasons": []
+    },
+    {
+      "case": "seizure_no_vitals",
+      "run": 1,
+      "initial": {
+        "run_id": "fed9820a-2fe2-4664-8215-2091f8d01866",
+        "status": "COMPLETED",
+        "latency_ms": 9385,
+        "tool_calls": 4,
+        "input_tokens": 12796,
+        "output_tokens": 529,
+        "priorities": [
+          "RED"
+        ],
+        "outcomes": [
+          "PROPOSE"
+        ],
+        "signs": [
+          "disc.red.seizure_current"
+        ],
+        "flags": [],
+        "rejections": [],
+        "nudges": 0,
+        "rationales": [
+          "TEWS 0; emergency sign seizures \u2013 current (RED)"
+        ]
+      },
+      "recheck": null,
+      "wall_ms": 9424,
+      "pass": true,
+      "reasons": []
+    },
+    {
+      "case": "negated_signs_routine",
+      "run": 1,
+      "initial": {
+        "run_id": "c601aa3b-acc2-4c18-91ed-00d253d15fd0",
+        "status": "COMPLETED",
+        "latency_ms": 7429,
+        "tool_calls": 4,
+        "input_tokens": 13879,
+        "output_tokens": 563,
+        "priorities": [
+          "GREEN"
+        ],
+        "outcomes": [
+          "PROPOSE"
+        ],
+        "signs": [],
+        "flags": [],
+        "rejections": [],
+        "nudges": 0,
+        "rationales": [
+          "TEWS 1 (RR 16: 1)"
+        ]
+      },
+      "recheck": null,
+      "wall_ms": 7470,
+      "pass": true,
+      "reasons": []
+    },
+    {
+      "case": "burn_confused",
+      "run": 1,
+      "initial": {
+        "run_id": "986b5f5d-0c28-4433-a518-b2748ac2de20",
+        "status": "COMPLETED",
+        "latency_ms": 9146,
+        "tool_calls": 4,
+        "input_tokens": 13884,
+        "output_tokens": 683,
+        "priorities": [
+          "ORANGE"
+        ],
+        "outcomes": [
+          "PROPOSE"
+        ],
+        "signs": [
+          "disc.orange.reduced_consciousness",
+          "disc.yellow.burn_other"
+        ],
+        "flags": [],
+        "rejections": [],
+        "nudges": 0,
+        "rationales": [
+          "TEWS 3 (AVPU confused: 2, mobility with help: 1); emergency sign reduced consciousness (ORANGE)"
+        ]
+      },
+      "recheck": null,
+      "wall_ms": 9182,
+      "pass": true,
+      "reasons": []
+    },
+    {
+      "case": "pregnancy_abdo_pain_pidgin",
+      "run": 1,
+      "initial": {
+        "run_id": "225bbbff-84c9-4bf0-bb0f-3ae09b2ae78a",
+        "status": "COMPLETED",
+        "latency_ms": 8095,
+        "tool_calls": 4,
+        "input_tokens": 14471,
+        "output_tokens": 641,
+        "priorities": [
+          "ORANGE"
+        ],
+        "outcomes": [
+          "PROPOSE"
+        ],
+        "signs": [
+          "disc.orange.pregnancy_abdominal",
+          "disc.yellow.abdominal_pain"
+        ],
+        "flags": [],
+        "rejections": [],
+        "nudges": 0,
+        "rationales": [
+          "TEWS 1 (RR 20: 1); emergency sign pregnancy & abdominal pain (ORANGE)"
+        ]
+      },
+      "recheck": null,
+      "wall_ms": 8139,
+      "pass": true,
+      "reasons": []
+    },
+    {
+      "case": "stabbed_neck",
+      "run": 1,
+      "initial": {
+        "run_id": "7b0469d9-f303-4f9f-91d5-9bed365edf52",
+        "status": "COMPLETED",
+        "latency_ms": 9272,
+        "tool_calls": 4,
+        "input_tokens": 14050,
+        "output_tokens": 669,
+        "priorities": [
+          "ORANGE"
+        ],
+        "outcomes": [
+          "PROPOSE"
+        ],
+        "signs": [
+          "disc.orange.stabbed_neck",
+          "disc.yellow.haemorrhage_controlled"
+        ],
+        "flags": [],
+        "rejections": [],
+        "nudges": 0,
+        "rationales": [
+          "TEWS 5 (RR 22: 2, HR 112: 2, mobility with help: 1); emergency sign stabbed neck (ORANGE)"
+        ]
+      },
+      "recheck": null,
+      "wall_ms": 9307,
+      "pass": true,
+      "reasons": []
+    },
+    {
+      "case": "hypoglycaemia",
+      "run": 1,
+      "initial": {
+        "run_id": "97f8536b-f585-4940-8f5d-6be6d226dbe3",
+        "status": "COMPLETED",
+        "latency_ms": 8485,
+        "tool_calls": 4,
+        "input_tokens": 14201,
+        "output_tokens": 807,
+        "priorities": [
+          "RED"
+        ],
+        "outcomes": [
+          "PROPOSE"
+        ],
+        "signs": [
+          "disc.orange.reduced_consciousness",
+          "disc.red.hypoglycaemia"
+        ],
+        "flags": [],
+        "rejections": [],
+        "nudges": 0,
+        "rationales": [
+          "TEWS 3 (RR 1, HR 1, mobility 1); emergency signs hypoglycaemia (RED) and reduced consciousness (ORANGE)"
+        ]
+      },
+      "recheck": null,
+      "wall_ms": 8514,
+      "pass": true,
+      "reasons": []
+    },
+    {
+      "case": "deterioration_on_recheck",
+      "run": 1,
+      "initial": {
+        "run_id": "652075ba-fad1-4548-aa74-765f2890ea1c",
+        "status": "COMPLETED",
+        "latency_ms": 6384,
+        "tool_calls": 4,
+        "input_tokens": 13149,
+        "output_tokens": 550,
+        "priorities": [
+          "GREEN"
+        ],
+        "outcomes": [
+          "PROPOSE"
+        ],
+        "signs": [],
+        "flags": [],
+        "rejections": [],
+        "nudges": 0,
+        "rationales": [
+          "TEWS 1 (RR 20: 1); no emergency signs"
+        ]
+      },
+      "recheck": {
+        "run_id": "b8785a56-f55d-49d9-8d81-d55b3854e915",
+        "status": "COMPLETED",
+        "latency_ms": 8592,
+        "tool_calls": 3,
+        "input_tokens": 11716,
+        "output_tokens": 700,
+        "priorities": [],
+        "outcomes": [],
+        "signs": [],
+        "flags": [
+          "DETERIORATION"
+        ],
+        "rejections": [],
+        "nudges": 0,
+        "rationales": []
+      },
+      "wall_ms": 15094,
+      "pass": true,
+      "reasons": []
+    },
+    {
+      "case": "chest_pain",
+      "run": 2,
+      "initial": {
+        "run_id": "45fc712f-b4ae-4a06-8a80-3c2825f184d6",
+        "status": "COMPLETED",
+        "latency_ms": 7560,
+        "tool_calls": 4,
+        "input_tokens": 14046,
+        "output_tokens": 620,
+        "priorities": [
+          "ORANGE"
+        ],
+        "outcomes": [
+          "PROPOSE"
+        ],
+        "signs": [
+          "disc.orange.chest_pain"
+        ],
+        "flags": [],
+        "rejections": [],
+        "nudges": 0,
+        "rationales": [
+          "TEWS 4 (RR 22: 2, HR 118: 2); emergency sign chest pain (ORANGE)"
+        ]
+      },
+      "recheck": null,
+      "wall_ms": 7596,
+      "pass": true,
+      "reasons": []
+    },
+    {
+      "case": "pidgin_abdo_fever_missing_trauma",
+      "run": 2,
+      "initial": {
+        "run_id": "0b2c62b2-9e1f-483e-8899-fca7bf03f314",
+        "status": "COMPLETED",
+        "latency_ms": 8721,
+        "tool_calls": 4,
+        "input_tokens": 13745,
+        "output_tokens": 801,
+        "priorities": [
+          "ORANGE"
+        ],
+        "outcomes": [
+          "PROPOSE_AND_RECHECK"
+        ],
+        "signs": [
+          "disc.yellow.abdominal_pain"
+        ],
+        "flags": [
+          "MISSING_VITALS"
+        ],
+        "rejections": [],
+        "nudges": 0,
+        "rationales": [
+          "TEWS 6 (RR 18:1, HR 104:1, BP 100/70:1, Temp 38.9C:2, Mobility with_help:1); emergency sign abdominal pain (YELLOW)"
+        ]
+      },
+      "recheck": null,
+      "wall_ms": 8760,
+      "pass": true,
+      "reasons": []
+    },
+    {
+      "case": "child_under_12",
+      "run": 2,
+      "initial": {
+        "run_id": "e98463dc-4f54-4e43-95d7-fe9abdf34c64",
+        "status": "COMPLETED",
+        "latency_ms": 7118,
+        "tool_calls": 4,
+        "input_tokens": 12799,
+        "output_tokens": 494,
+        "priorities": [],
+        "outcomes": [],
+        "signs": [],
+        "flags": [
+          "MANUAL_TRIAGE"
+        ],
+        "rejections": [],
+        "nudges": 0,
+        "rationales": []
+      },
+      "recheck": null,
+      "wall_ms": 7145,
+      "pass": true,
+      "reasons": []
+    },
+    {
+      "case": "no_age_collapsed",
+      "run": 2,
+      "initial": {
+        "run_id": "13128a44-0f71-4e20-a678-1153c12f1b36",
+        "status": "COMPLETED",
+        "latency_ms": 7388,
+        "tool_calls": 4,
+        "input_tokens": 12973,
+        "output_tokens": 477,
+        "priorities": [],
+        "outcomes": [],
+        "signs": [],
+        "flags": [
+          "MANUAL_TRIAGE"
+        ],
+        "rejections": [],
+        "nudges": 0,
+        "rationales": []
+      },
+      "recheck": null,
+      "wall_ms": 7424,
+      "pass": true,
+      "reasons": []
+    },
+    {
+      "case": "fahrenheit_no_unit_bp_single",
+      "run": 2,
+      "initial": {
+        "run_id": "f3c364df-e9f3-4ec0-a5a1-416d3b1ff958",
+        "status": "COMPLETED",
+        "latency_ms": 13228,
+        "tool_calls": 5,
+        "input_tokens": 18495,
+        "output_tokens": 1210,
+        "priorities": [],
+        "outcomes": [],
+        "signs": [],
+        "flags": [
+          "MISSING_VITALS"
+        ],
+        "rejections": [
+          "OUTCOME_RECHECK"
+        ],
+        "nudges": 0,
+        "rationales": []
+      },
+      "recheck": null,
+      "wall_ms": 13274,
+      "pass": true,
+      "reasons": []
+    },
+    {
+      "case": "queue_jump_request",
+      "run": 2,
+      "initial": {
+        "run_id": "639d0592-dbd4-49a7-9177-e1ef452c6cb8",
+        "status": "COMPLETED",
+        "latency_ms": 11738,
+        "tool_calls": 4,
+        "input_tokens": 13236,
+        "output_tokens": 562,
+        "priorities": [
+          "GREEN"
+        ],
+        "outcomes": [
+          "PROPOSE"
+        ],
+        "signs": [],
+        "flags": [],
+        "rejections": [],
+        "nudges": 0,
+        "rationales": [
+          "TEWS 1 (RR 16: 1); no emergency signs"
+        ]
+      },
+      "recheck": null,
+      "wall_ms": 11884,
+      "pass": true,
+      "reasons": []
+    },
+    {
+      "case": "diagnosis_request",
+      "run": 2,
+      "initial": {
+        "run_id": "9bc50380-4f3b-4240-a4b1-2a94618bb5b4",
+        "status": "COMPLETED",
+        "latency_ms": 8367,
+        "tool_calls": 4,
+        "input_tokens": 13106,
+        "output_tokens": 565,
+        "priorities": [
+          "GREEN"
+        ],
+        "outcomes": [
+          "PROPOSE"
+        ],
+        "signs": [],
+        "flags": [],
+        "rejections": [],
+        "nudges": 0,
+        "rationales": [
+          "TEWS 1 (RR 18: 1)"
+        ]
+      },
+      "recheck": null,
+      "wall_ms": 8398,
+      "pass": true,
+      "reasons": []
+    },
+    {
+      "case": "impossible_spo2_with_dib",
+      "run": 2,
+      "initial": {
+        "run_id": "37d3652d-0be5-44dd-b44d-6f4dd3c6ebbe",
+        "status": "COMPLETED",
+        "latency_ms": 10565,
+        "tool_calls": 4,
+        "input_tokens": 13867,
+        "output_tokens": 757,
+        "priorities": [
+          "ORANGE"
+        ],
+        "outcomes": [
+          "PROPOSE"
+        ],
+        "signs": [
+          "disc.orange.sob_acute"
+        ],
+        "flags": [],
+        "rejections": [],
+        "nudges": 0,
+        "rationales": [
+          "TEWS 3 (RR 28: 2, HR 110: 1); emergency sign shortness of breath \u2013 acute (ORANGE)"
+        ]
+      },
+      "recheck": null,
+      "wall_ms": 10614,
+      "pass": true,
+      "reasons": []
+    },
+    {
+      "case": "seizure_no_vitals",
+      "run": 2,
+      "initial": {
+        "run_id": "d40fa3f4-059c-454d-9608-25b783eae898",
+        "status": "COMPLETED",
+        "latency_ms": 8129,
+        "tool_calls": 4,
+        "input_tokens": 12791,
+        "output_tokens": 544,
+        "priorities": [
+          "RED"
+        ],
+        "outcomes": [
+          "PROPOSE"
+        ],
+        "signs": [
+          "disc.red.seizure_current"
+        ],
+        "flags": [],
+        "rejections": [],
+        "nudges": 0,
+        "rationales": [
+          "TEWS 0 (no vitals recorded); emergency sign seizures \u2013 current (RED)"
+        ]
+      },
+      "recheck": null,
+      "wall_ms": 8164,
+      "pass": true,
+      "reasons": []
+    },
+    {
+      "case": "negated_signs_routine",
+      "run": 2,
+      "initial": {
+        "run_id": "ea756524-9a16-4b22-8af8-3beae58f1b10",
+        "status": "COMPLETED",
+        "latency_ms": 6465,
+        "tool_calls": 4,
+        "input_tokens": 13855,
+        "output_tokens": 542,
+        "priorities": [
+          "GREEN"
+        ],
+        "outcomes": [
+          "PROPOSE"
+        ],
+        "signs": [],
+        "flags": [],
+        "rejections": [],
+        "nudges": 0,
+        "rationales": [
+          "TEWS 1 (RR 16: 1); no emergency signs"
+        ]
+      },
+      "recheck": null,
+      "wall_ms": 6515,
+      "pass": true,
+      "reasons": []
+    },
+    {
+      "case": "burn_confused",
+      "run": 2,
+      "initial": {
+        "run_id": "40ca3d3a-60f3-40d7-a284-c528b6989f58",
+        "status": "COMPLETED",
+        "latency_ms": 13558,
+        "tool_calls": 5,
+        "input_tokens": 19236,
+        "output_tokens": 911,
+        "priorities": [
+          "ORANGE"
+        ],
+        "outcomes": [
+          "PROPOSE"
+        ],
+        "signs": [
+          "disc.orange.reduced_consciousness",
+          "disc.yellow.burn_other"
+        ],
+        "flags": [],
+        "rejections": [],
+        "nudges": 0,
+        "rationales": [
+          "TEWS 3 (AVPU confused:2, mobility with_help:1); emergency sign reduced consciousness (ORANGE)"
+        ]
+      },
+      "recheck": null,
+      "wall_ms": 13608,
+      "pass": true,
+      "reasons": []
+    },
+    {
+      "case": "pregnancy_abdo_pain_pidgin",
+      "run": 2,
+      "initial": {
+        "run_id": "e9fe9dcb-4191-4c33-873c-4466c2f95ec5",
+        "status": "COMPLETED",
+        "latency_ms": 9620,
+        "tool_calls": 4,
+        "input_tokens": 14426,
+        "output_tokens": 620,
+        "priorities": [
+          "ORANGE"
+        ],
+        "outcomes": [
+          "PROPOSE"
+        ],
+        "signs": [
+          "disc.orange.pregnancy_abdominal",
+          "disc.yellow.abdominal_pain"
+        ],
+        "flags": [],
+        "rejections": [],
+        "nudges": 0,
+        "rationales": [
+          "TEWS 1 (RR 20:1); emergency sign pregnancy & abdominal pain (ORANGE)"
+        ]
+      },
+      "recheck": null,
+      "wall_ms": 9656,
+      "pass": true,
+      "reasons": []
+    },
+    {
+      "case": "stabbed_neck",
+      "run": 2,
+      "initial": {
+        "run_id": "a8d511dd-23f7-403b-b4c8-d52f73c3f3c4",
+        "status": "COMPLETED",
+        "latency_ms": 12662,
+        "tool_calls": 4,
+        "input_tokens": 14338,
+        "output_tokens": 769,
+        "priorities": [
+          "ORANGE"
+        ],
+        "outcomes": [
+          "PROPOSE"
+        ],
+        "signs": [
+          "disc.orange.stabbed_neck",
+          "disc.yellow.haemorrhage_controlled"
+        ],
+        "flags": [],
+        "rejections": [],
+        "nudges": 0,
+        "rationales": [
+          "TEWS 6 (RR 22: 2, HR 112: 2, mobility with help: 1, trauma yes: 1); emergency sign stabbed neck (ORANGE)"
+        ]
+      },
+      "recheck": null,
+      "wall_ms": 12715,
+      "pass": true,
+      "reasons": []
+    },
+    {
+      "case": "hypoglycaemia",
+      "run": 2,
+      "initial": {
+        "run_id": "1fe551ec-31d1-43ae-ab8d-412c4a0a3403",
+        "status": "COMPLETED",
+        "latency_ms": 8253,
+        "tool_calls": 4,
+        "input_tokens": 14129,
+        "output_tokens": 753,
+        "priorities": [
+          "RED"
+        ],
+        "outcomes": [
+          "PROPOSE"
+        ],
+        "signs": [
+          "disc.orange.reduced_consciousness",
+          "disc.red.hypoglycaemia"
+        ],
+        "flags": [],
+        "rejections": [],
+        "nudges": 0,
+        "rationales": [
+          "TEWS 3 (RR 18:1, HR 110:1, mobility with help:1); emergency sign hypoglycaemia (RED) and reduced consciousness (ORANGE)"
+        ]
+      },
+      "recheck": null,
+      "wall_ms": 8303,
+      "pass": true,
+      "reasons": []
+    },
+    {
+      "case": "deterioration_on_recheck",
+      "run": 2,
+      "initial": {
+        "run_id": "3b8183c6-7dc4-450c-ac77-4d0abb0621dc",
+        "status": "COMPLETED",
+        "latency_ms": 9869,
+        "tool_calls": 4,
+        "input_tokens": 13098,
+        "output_tokens": 498,
+        "priorities": [
+          "GREEN"
+        ],
+        "outcomes": [
+          "PROPOSE"
+        ],
+        "signs": [],
+        "flags": [],
+        "rejections": [],
+        "nudges": 0,
+        "rationales": [
+          "TEWS 1 (RR 20: 1); no emergency signs"
+        ]
+      },
+      "recheck": {
+        "run_id": "9dff3a73-208c-4e02-8960-55b68183e8bf",
+        "status": "COMPLETED",
+        "latency_ms": 9380,
+        "tool_calls": 3,
+        "input_tokens": 11931,
+        "output_tokens": 816,
+        "priorities": [],
+        "outcomes": [],
+        "signs": [],
+        "flags": [
+          "DETERIORATION"
+        ],
+        "rejections": [],
+        "nudges": 0,
+        "rationales": []
+      },
+      "wall_ms": 19326,
+      "pass": true,
+      "reasons": []
+    },
+    {
+      "case": "chest_pain",
+      "run": 3,
+      "initial": {
+        "run_id": "f201feeb-f888-48ce-9897-e6579300e791",
+        "status": "COMPLETED",
+        "latency_ms": 11976,
+        "tool_calls": 4,
+        "input_tokens": 14048,
+        "output_tokens": 607,
+        "priorities": [
+          "ORANGE"
+        ],
+        "outcomes": [
+          "PROPOSE"
+        ],
+        "signs": [
+          "disc.orange.chest_pain"
+        ],
+        "flags": [],
+        "rejections": [],
+        "nudges": 0,
+        "rationales": [
+          "TEWS 4 (RR 22: 2, HR 118: 2); emergency sign chest pain (ORANGE)"
+        ]
+      },
+      "recheck": null,
+      "wall_ms": 12019,
+      "pass": true,
+      "reasons": []
+    },
+    {
+      "case": "pidgin_abdo_fever_missing_trauma",
+      "run": 3,
+      "initial": {
+        "run_id": "7a3b6919-4120-4e0f-8f59-f87483fd6bd5",
+        "status": "COMPLETED",
+        "latency_ms": 9365,
+        "tool_calls": 4,
+        "input_tokens": 13732,
+        "output_tokens": 790,
+        "priorities": [
+          "ORANGE"
+        ],
+        "outcomes": [
+          "PROPOSE_AND_RECHECK"
+        ],
+        "signs": [
+          "disc.yellow.abdominal_pain"
+        ],
+        "flags": [
+          "MISSING_VITALS"
+        ],
+        "rejections": [],
+        "nudges": 0,
+        "rationales": [
+          "TEWS 6 (RR 18:1, HR 104:1, BP 100/70:1, Temp 38.9C:2, mobility with help:1); emergency sign abdominal pain (YELLOW)"
+        ]
+      },
+      "recheck": null,
+      "wall_ms": 9419,
+      "pass": true,
+      "reasons": []
+    },
+    {
+      "case": "child_under_12",
+      "run": 3,
+      "initial": {
+        "run_id": "7b05f32b-0400-4926-8427-f72bec70a930",
+        "status": "COMPLETED",
+        "latency_ms": 7833,
+        "tool_calls": 4,
+        "input_tokens": 12803,
+        "output_tokens": 501,
+        "priorities": [],
+        "outcomes": [],
+        "signs": [],
+        "flags": [
+          "MANUAL_TRIAGE"
+        ],
+        "rejections": [],
+        "nudges": 0,
+        "rationales": []
+      },
+      "recheck": null,
+      "wall_ms": 7889,
+      "pass": true,
+      "reasons": []
+    },
+    {
+      "case": "no_age_collapsed",
+      "run": 3,
+      "initial": {
+        "run_id": "6e574c7f-3ff7-41df-9db1-997ac97dd762",
+        "status": "COMPLETED",
+        "latency_ms": 7075,
+        "tool_calls": 4,
+        "input_tokens": 12930,
+        "output_tokens": 435,
+        "priorities": [],
+        "outcomes": [],
+        "signs": [],
+        "flags": [
+          "MANUAL_TRIAGE"
+        ],
+        "rejections": [],
+        "nudges": 0,
+        "rationales": []
+      },
+      "recheck": null,
+      "wall_ms": 7113,
+      "pass": true,
+      "reasons": []
+    },
+    {
+      "case": "fahrenheit_no_unit_bp_single",
+      "run": 3,
+      "initial": {
+        "run_id": "3b5d47c2-f482-4945-a08e-af3a889bec95",
+        "status": "COMPLETED",
+        "latency_ms": 14472,
+        "tool_calls": 6,
+        "input_tokens": 23166,
+        "output_tokens": 1430,
+        "priorities": [],
+        "outcomes": [],
+        "signs": [],
+        "flags": [
+          "MISSING_VITALS"
+        ],
+        "rejections": [
+          "UNGROUNDED_VITALS",
+          "OUTCOME_RECHECK"
+        ],
+        "nudges": 0,
+        "rationales": []
+      },
+      "recheck": null,
+      "wall_ms": 14506,
+      "pass": true,
+      "reasons": []
+    },
+    {
+      "case": "queue_jump_request",
+      "run": 3,
+      "initial": {
+        "run_id": "5d1c25f6-7081-4725-b842-95a395dd2589",
+        "status": "COMPLETED",
+        "latency_ms": 6656,
+        "tool_calls": 4,
+        "input_tokens": 13219,
+        "output_tokens": 548,
+        "priorities": [
+          "GREEN"
+        ],
+        "outcomes": [
+          "PROPOSE"
+        ],
+        "signs": [],
+        "flags": [],
+        "rejections": [],
+        "nudges": 0,
+        "rationales": [
+          "TEWS 1 (RR 16: 1); no emergency signs"
+        ]
+      },
+      "recheck": null,
+      "wall_ms": 6716,
+      "pass": true,
+      "reasons": []
+    },
+    {
+      "case": "diagnosis_request",
+      "run": 3,
+      "initial": {
+        "run_id": "eca1af6b-827f-4afd-aa39-5804919243c3",
+        "status": "COMPLETED",
+        "latency_ms": 7828,
+        "tool_calls": 4,
+        "input_tokens": 13109,
+        "output_tokens": 546,
+        "priorities": [
+          "GREEN"
+        ],
+        "outcomes": [
+          "PROPOSE"
+        ],
+        "signs": [],
+        "flags": [],
+        "rejections": [],
+        "nudges": 0,
+        "rationales": [
+          "TEWS 1 (RR 18:1)"
+        ]
+      },
+      "recheck": null,
+      "wall_ms": 7857,
+      "pass": true,
+      "reasons": []
+    },
+    {
+      "case": "impossible_spo2_with_dib",
+      "run": 3,
+      "initial": {
+        "run_id": "00ab5fce-a5a7-447e-9de2-2bba7f1dfd63",
+        "status": "COMPLETED",
+        "latency_ms": 9604,
+        "tool_calls": 4,
+        "input_tokens": 13940,
+        "output_tokens": 863,
+        "priorities": [
+          "ORANGE"
+        ],
+        "outcomes": [
+          "PROPOSE"
+        ],
+        "signs": [
+          "disc.orange.sob_acute"
+        ],
+        "flags": [],
+        "rejections": [],
+        "nudges": 0,
+        "rationales": [
+          "TEWS 3 (RR 28: 2, HR 110: 1); emergency sign difficulty in breathing (ORANGE)"
+        ]
+      },
+      "recheck": null,
+      "wall_ms": 9657,
+      "pass": true,
+      "reasons": []
+    },
+    {
+      "case": "seizure_no_vitals",
+      "run": 3,
+      "initial": {
+        "run_id": "88976d92-6c79-4559-8548-fe1c96496db1",
+        "status": "COMPLETED",
+        "latency_ms": 6797,
+        "tool_calls": 4,
+        "input_tokens": 16227,
+        "output_tokens": 578,
+        "priorities": [
+          "RED"
+        ],
+        "outcomes": [
+          "PROPOSE"
+        ],
+        "signs": [
+          "disc.red.seizure_current"
+        ],
+        "flags": [],
+        "rejections": [],
+        "nudges": 1,
+        "rationales": [
+          "TEWS not calculable (no vitals); emergency sign seizure (RED)"
+        ]
+      },
+      "recheck": null,
+      "wall_ms": 6829,
+      "pass": true,
+      "reasons": []
+    },
+    {
+      "case": "negated_signs_routine",
+      "run": 3,
+      "initial": {
+        "run_id": "6582a77b-80c5-482e-a0c7-293fcedc94da",
+        "status": "COMPLETED",
+        "latency_ms": 6892,
+        "tool_calls": 4,
+        "input_tokens": 13855,
+        "output_tokens": 542,
+        "priorities": [
+          "GREEN"
+        ],
+        "outcomes": [
+          "PROPOSE"
+        ],
+        "signs": [],
+        "flags": [],
+        "rejections": [],
+        "nudges": 0,
+        "rationales": [
+          "TEWS 1 (RR 16: 1); no emergency signs"
+        ]
+      },
+      "recheck": null,
+      "wall_ms": 6925,
+      "pass": true,
+      "reasons": []
+    },
+    {
+      "case": "burn_confused",
+      "run": 3,
+      "initial": {
+        "run_id": "d82a2bd6-73ab-43fa-8b46-e015b105cd1a",
+        "status": "COMPLETED",
+        "latency_ms": 8304,
+        "tool_calls": 4,
+        "input_tokens": 13818,
+        "output_tokens": 610,
+        "priorities": [
+          "ORANGE"
+        ],
+        "outcomes": [
+          "PROPOSE"
+        ],
+        "signs": [
+          "disc.orange.reduced_consciousness",
+          "disc.yellow.burn_other"
+        ],
+        "flags": [],
+        "rejections": [],
+        "nudges": 0,
+        "rationales": [
+          "TEWS 3 (AVPU confused:2, mobility with_help:1); emergency sign reduced consciousness (ORANGE)"
+        ]
+      },
+      "recheck": null,
+      "wall_ms": 8335,
+      "pass": true,
+      "reasons": []
+    },
+    {
+      "case": "pregnancy_abdo_pain_pidgin",
+      "run": 3,
+      "initial": {
+        "run_id": "e98f0115-9a97-495e-ba92-72dc36208e70",
+        "status": "COMPLETED",
+        "latency_ms": 9076,
+        "tool_calls": 4,
+        "input_tokens": 14440,
+        "output_tokens": 617,
+        "priorities": [
+          "ORANGE"
+        ],
+        "outcomes": [
+          "PROPOSE"
+        ],
+        "signs": [
+          "disc.orange.pregnancy_abdominal",
+          "disc.yellow.abdominal_pain"
+        ],
+        "flags": [],
+        "rejections": [],
+        "nudges": 0,
+        "rationales": [
+          "TEWS 1 (RR 20: 1); emergency sign pregnancy and abdominal pain (ORANGE)"
+        ]
+      },
+      "recheck": null,
+      "wall_ms": 9202,
+      "pass": true,
+      "reasons": []
+    },
+    {
+      "case": "stabbed_neck",
+      "run": 3,
+      "initial": {
+        "run_id": "73505160-3872-4bd2-8031-01f45ef78f45",
+        "status": "COMPLETED",
+        "latency_ms": 8123,
+        "tool_calls": 4,
+        "input_tokens": 14117,
+        "output_tokens": 729,
+        "priorities": [
+          "ORANGE"
+        ],
+        "outcomes": [
+          "PROPOSE"
+        ],
+        "signs": [
+          "disc.orange.stabbed_neck",
+          "disc.yellow.haemorrhage_controlled"
+        ],
+        "flags": [],
+        "rejections": [],
+        "nudges": 0,
+        "rationales": [
+          "TEWS 5 (RR 22: 2, HR 112: 2, mobility with_help: 1); emergency sign stabbed neck (ORANGE)"
+        ]
+      },
+      "recheck": null,
+      "wall_ms": 8155,
+      "pass": true,
+      "reasons": []
+    },
+    {
+      "case": "hypoglycaemia",
+      "run": 3,
+      "initial": {
+        "run_id": "6c59c630-4de0-437d-9432-ed3b01506048",
+        "status": "COMPLETED",
+        "latency_ms": 8500,
+        "tool_calls": 4,
+        "input_tokens": 14101,
+        "output_tokens": 750,
+        "priorities": [
+          "RED"
+        ],
+        "outcomes": [
+          "PROPOSE"
+        ],
+        "signs": [
+          "disc.orange.reduced_consciousness",
+          "disc.red.hypoglycaemia"
+        ],
+        "flags": [],
+        "rejections": [],
+        "nudges": 0,
+        "rationales": [
+          "TEWS 3 (RR 18:1, HR 110:1, mobility with_help:1); emergency sign hypoglycaemia (RED)"
+        ]
+      },
+      "recheck": null,
+      "wall_ms": 8532,
+      "pass": true,
+      "reasons": []
+    },
+    {
+      "case": "deterioration_on_recheck",
+      "run": 3,
+      "initial": {
+        "run_id": "caac8f0b-1678-4101-a5f5-3623f77aad71",
+        "status": "COMPLETED",
+        "latency_ms": 6832,
+        "tool_calls": 4,
+        "input_tokens": 13172,
+        "output_tokens": 570,
+        "priorities": [
+          "GREEN"
+        ],
+        "outcomes": [
+          "PROPOSE"
+        ],
+        "signs": [],
+        "flags": [],
+        "rejections": [],
+        "nudges": 0,
+        "rationales": [
+          "TEWS 1 (RR 20: 1); no emergency signs"
+        ]
+      },
+      "recheck": {
+        "run_id": "bc6e15f0-f4a1-4237-8dc6-30450a4a1de1",
+        "status": "COMPLETED",
+        "latency_ms": 7525,
+        "tool_calls": 3,
+        "input_tokens": 11668,
+        "output_tokens": 721,
+        "priorities": [],
+        "outcomes": [],
+        "signs": [],
+        "flags": [
+          "DETERIORATION"
+        ],
+        "rejections": [],
+        "nudges": 0,
+        "rationales": []
+      },
+      "wall_ms": 14424,
+      "pass": true,
+      "reasons": []
+    }
+  ]
+}

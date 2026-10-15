@@ -27,7 +27,9 @@ CATEGORY_EVIDENCE: dict[tuple[str, str], tuple[str, ...]] = {
     ("mobility", "walking"): ("walk", "ambula", "ambulant"),
     ("mobility", "with_help"): ("help", "assist", "support", "wheelchair", "held up"),
     ("mobility", "stretcher"): ("stretcher", "carried", "immobile", "trolley", "cannot walk", "can't walk", "no fit waka"),
-    ("trauma", "yes"): ("trauma", "injur", "fell", "fall", "rta", "accident", "wound", "laceration", "beaten", "assault", "okada"),
+    # SATS p.27: trauma is ANY injury to the patient within the past 48 hours.
+    ("trauma", "yes"): ("trauma", "injur", "fell", "fall", "rta", "accident", "wound", "laceration", "beaten",
+                        "assault", "okada", "stab", "knife", "burn", "scald", "gunshot", "bite", "bitten"),
     ("trauma", "no"): ("no trauma", "no injur", "nil trauma", "no history of trauma", "no fall"),
 }
 
@@ -99,7 +101,39 @@ def ungrounded_vitals(vitals: dict[str, Any], tews: dict[str, Any], note: str) -
         if missing:
             problems.append({"field": key, "value": raw,
                              "reason": f"number(s) {', '.join(f'{n:g}' for n in missing)} not found in the note"})
+            continue
+        if canonical == "temperature":
+            unit = _unit(str(raw))
+            number = _first_number(str(raw))
+            if unit and number is not None and not _unit_written(note_lower, number, unit):
+                problems.append({"field": key, "value": raw,
+                                 "reason": f"the note does not write °{unit.upper()} for this temperature; do not add a "
+                                           "unit that is not written (pass the value exactly as written)"})
+        if canonical in ("systolic_bp", "bp"):
+            sbp = _first_number(str(raw))  # systolic is the first number in "150/90"
+            if sbp is not None and not re.search(rf"(?<![\d.]){sbp:g}\s*(/|over|\\)\s*\d", note_lower):
+                problems.append({"field": key, "value": raw,
+                                 "reason": "the note does not give this blood pressure as systolic/diastolic "
+                                           "(e.g. 120/80); a single number is not scored, leave it out"})
     return problems
+
+
+def _first_number(text: str) -> float | None:
+    m = _NUMBER.search(text)
+    return float(m.group()) if m else None
+
+
+def _unit(raw: str) -> str | None:
+    m = re.search(r"\d\s*°?\s*([cf])\b", raw.lower())
+    return m.group(1) if m else None
+
+
+def _unit_written(note_lower: str, number: float, unit: str) -> bool:
+    """Is `number` followed by this unit (C or F, optional ° and space) somewhere in the note?"""
+    for m in re.finditer(r"(\d+(?:\.\d+)?)\s*°?\s*([cf])\b", note_lower):
+        if float(m.group(1)) == number and m.group(2) == unit:
+            return True
+    return False
 
 
 def forbidden_language(rationale: str) -> list[str]:

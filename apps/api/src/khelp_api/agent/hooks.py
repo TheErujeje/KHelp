@@ -47,6 +47,7 @@ class RunHooks(HookProvider):
         self.model = model
         self.max_tool_calls = max_tool_calls
         self.tool_calls = 0
+        self.tools_called: list[str] = []
         self.limit_hit = False
         self.on_event = on_event
         self._session = session_factory()
@@ -65,6 +66,7 @@ class RunHooks(HookProvider):
 
     def after_tool(self, event: AfterToolCallEvent) -> None:
         tool_use = event.tool_use
+        self.tools_called.append(tool_use.get("name") or "")
         payload = _result_payload(event.result)
         if event.exception is not None:
             payload["exception"] = repr(event.exception)

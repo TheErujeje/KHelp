@@ -88,3 +88,31 @@ def test_mismatch_with_missing_inputs_says_propose_not_recheck():
     err = r.errors[0]
     assert err["details"]["next_call"] == {"tool": "propose_priority", "priority": "ORANGE"}
     assert "Do NOT call request_recheck" in err["how_to_fix"]
+
+
+def test_trauma_evidence_includes_any_injury():
+    note = "SYNTHETIC. 27yr M stabbed in the neck at the market. walked in with help, alert. RR 22 PR 112 BP 108/70 T 36.8C"
+    r = check_proposal(priority="ORANGE", vitals={"rr": 22, "hr": 112, "bp": "108/70", "temp": "36.8C", "avpu": "alert",
+                                                  "mobility": "with_help", "trauma": "yes"},
+                       age_years=27, discriminator_ids=["disc.orange.stabbed_neck"], rationale="TEWS 6; stabbed neck.",
+                       note=note)
+    assert "UNGROUNDED_VITALS" not in codes(r)
+
+
+def test_agent_may_not_add_a_temperature_unit_or_reshape_bp():
+    note = "SYNTHETIC. 60yrs M, c/o headache. Alert, walked in, no trauma. PR 88 RR 16 T 101 BP 160"
+    vitals = {"hr": 88, "rr": 16, "avpu": "alert", "temp": "101F", "mobility": "walking", "trauma": "no",
+              "systolic_bp": 160}
+    r = check_proposal(priority="GREEN", vitals=vitals, age_years=60, discriminator_ids=[],
+                       rationale="TEWS 1.", note=note)
+    bad = {v["field"] for e in r.errors if e["code"] == "UNGROUNDED_VITALS" for v in e["details"]["vitals"]}
+    assert bad == {"temp", "systolic_bp"}
+
+
+def test_written_units_and_bp_pairs_are_accepted():
+    note = "SYNTHETIC. 45yrs M chest pain, walked in, alert, no trauma. RR 22 PR 118 B/P 150 / 90 Temp 98.6 °F"
+    vitals = {"rr": 22, "hr": 118, "bp": "150/90", "temp": "98.6F", "avpu": "alert", "mobility": "walking",
+              "trauma": "no"}
+    r = check_proposal(priority="ORANGE", vitals=vitals, age_years=45, discriminator_ids=["disc.orange.chest_pain"],
+                       rationale="TEWS 4; chest pain.", note=note)
+    assert "UNGROUNDED_VITALS" not in codes(r)

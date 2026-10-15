@@ -17,13 +17,18 @@ It never diagnoses, never prescribes, and never changes the queue by itself.
 
 **https://klaudesk.klaudverse.com**
 
-Sign in with any name (demo sign-in, no password check). Then either press **Score** on one of the
-synthetic patients waiting on the dashboard, or open **Triage desk**, pick a sample note (or type
-your own), and press **Score this patient**. Approve or change the proposed priority, and open the
-**Audit log** to see every tool call and decision.
+Sign in with any name (demo sign-in, no password check) and pick a role. Each role lands on its own
+work:
 
-The live demo runs on a hosted open-weights model (`gpt-oss-120b`) because the self-hosted GPU
-instance is awaiting an AWS quota increase. See [Where the model runs](#where-the-model-runs).
+| Role | Lands on | Can do |
+|---|---|---|
+| **Triage nurse** | **Triage desk**: type the note (or pick a synthetic sample), watch the agent score it, then **Approve** or raise the priority, and move to the next patient | Approve, raise a priority, re-check a waiting patient, acknowledge flags |
+| **Doctor** | **Next up**: triaged patients in call order, each with a timer against the SATS target time (RED immediate, ORANGE 10 min, YELLOW 1 h, GREEN 4 h), the note, why that priority, who triaged it, and deterioration alerts | **Call in**, **Seen**, and senior decisions: lower a priority, set the priority of a child sent to manual triage |
+| **Senior nurse** | **Next up** | Same senior decisions as a doctor (SATS manual p.6, senior healthcare professional's discretion) |
+
+The **Queue** page has the whole waiting room with a **Score** button for the seeded synthetic
+patients, and the **Audit log** shows every tool call and every decision with who made it.
+The live demo runs the open-weights model `gpt-oss-120b`; see [Where the model runs](#where-the-model-runs).
 
 ## Run it yourself
 
@@ -93,7 +98,7 @@ Port 80 must be free. To use another port, change `"80:80"` under `web` in `dock
 ### Run the tests
 
 ```bash
-uv sync && uv run pytest           # 103 tests: scoring (against the manual), proposal checks, model settings
+uv sync && uv run pytest           # 111 tests: scoring (against the manual), proposal checks, roles, model settings
 ```
 
 ### Run one note from the command line (no web UI)
@@ -130,7 +135,8 @@ nurse ──note──> API ──starts run──> Agent (open-weights LLM, Str
 - Every tool call and every human decision goes to an append-only audit log, shown live in the UI.
 
 A plain-language walk-through, including what MCP is and where each safety rule is enforced, is in
-**[docs/WORKFLOW.md](docs/WORKFLOW.md)**.
+**[docs/WORKFLOW.md](docs/WORKFLOW.md)**. One-page design: **[ARCHITECTURE.md](ARCHITECTURE.md)**.
+Results on 15 synthetic cases, 3 runs each, with failures: **[EVALS.md](EVALS.md)**.
 
 ### Safety rules and where they are enforced
 
@@ -141,7 +147,8 @@ A plain-language walk-through, including what MCP is and where each safety rule 
 | Missing vitals are never guessed | Values must appear in the note; a missing value is bounded, not filled in; if it could change the priority, the patient is flagged for a re-check |
 | No diagnosis or treatment | The server rejects rationales with doses, prescribing words, condition names or hedged diagnoses |
 | Every action logged | Each tool writes its audit row in the same transaction as its action; the audit table rejects UPDATE and DELETE |
-| A named human decides | Approve, override (with a reason) and manual-triage acknowledge are the only paths that set a priority |
+| A named human decides | Approve, override (with a reason) and manual-triage acknowledge are the only paths that set a priority; each records name and role |
+| Senior discretion (SATS p.6) | Lowering a priority below the SATS result, or setting a manual-triage priority, needs a doctor or senior nurse; the API refuses a triage nurse (403) |
 | Runs are bounded | Max 12 tool calls and a timeout per run; a run that ends without a valid result flags the patient for manual triage |
 
 ## Where the model runs
@@ -187,10 +194,10 @@ and are applied within a minute of a change, with no redeploy. Deployment: [depl
   and hand over to a senior clinician") are not yet prompted. SpO2 is recorded but, as in the manual,
   is not itself an adult emergency sign.
 - **Demo sign-in only**: no real accounts. A hospital deployment would use its own staff login.
-- **The live demo** uses a hosted model until the GPU instance is approved.
 - **Smaller models need correcting.** 3B–7B models often get the priority wrong on the first try;
   the server rejects it and they fix it, which shows in the live feed. Models under 3B fail the task.
-- **Evaluation write-up (EVALS.md) and ARCHITECTURE.md are in progress.**
+- **Roles come from the demo sign-in.** The API enforces what each role may do, but a hospital
+  deployment would take the role from its own staff login.
 
 ## Repository layout
 
