@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useSearchParams } from "react-router-dom";
 import { usePendingFlags, usePendingProposals } from "../api";
 import { FlagReview, ProposalReview } from "../components/Review";
 import { Card, ErrorText, PageHeader, PatientLink, PriorityBadge } from "../components/ui";
@@ -7,7 +7,9 @@ import { waitLabel } from "../lib";
 export default function Approvals() {
   const proposals = usePendingProposals();
   const flags = usePendingFlags();
-  const [tab, setTab] = useState<"proposals" | "flags">("proposals");
+  const [params, setParams] = useSearchParams();
+  const tab: "proposals" | "flags" = params.get("tab") === "flags" ? "flags" : "proposals";
+  const setTab = (t: "proposals" | "flags") => setParams(t === "flags" ? { tab: "flags" } : {});
   const pList = proposals.data?.proposals ?? [];
   const fList = flags.data?.flags ?? [];
 

@@ -25,7 +25,7 @@ export default function PatientPage() {
 
   return (
     <>
-      <PageHeader title={p.display_name}
+      <PageHeader title={p.display_name} back="/queue"
         subtitle={`${p.is_synthetic ? "Synthetic patient · " : ""}${p.status.toLowerCase()} · waiting ${waitLabel(p.wait_minutes)}`}
         actions={waiting && (
           <button className="btn-secondary" disabled={seen.isPending} onClick={() => seen.mutate({ id, clinician_name: me.name, clinician_role: ROLE_CODE[me.role] })}>

@@ -1,5 +1,5 @@
 import { useEffect, useState } from "react";
-import { Link } from "react-router-dom";
+import { Link, useSearchParams } from "react-router-dom";
 import { useQueryClient } from "@tanstack/react-query";
 import { ArrowRight, Loader2, RotateCcw, Sparkles, TerminalSquare } from "lucide-react";
 import { useCreateIntake, useRun } from "../api";
@@ -18,16 +18,24 @@ const SAMPLES: { label: string; text: string }[] = [
 export default function TriageDesk() {
   const [note, setNote] = useState("");
   const [name, setName] = useState("");
-  const [submitted, setSubmitted] = useState<{ runId: string; note: string; startedAt: number } | null>(null);
   const create = useCreateIntake();
+  // The run being shown is in the URL (/triage?run=...), so Back, Forward and refresh return to it.
+  const [params, setParams] = useSearchParams();
+  const runId = params.get("run");
+  const run = useRun(runId);
+  const submitted = runId ? {
+    runId,
+    note: run.data?.note_text ?? note,
+    startedAt: run.data ? Date.parse(run.data.run.started_at) : Date.now(),
+  } : null;
 
-  const reset = () => { setSubmitted(null); setNote(""); setName(""); create.reset(); };
+  const reset = () => { setParams({}); setNote(""); setName(""); create.reset(); };
 
   const submit = (e: React.FormEvent) => {
     e.preventDefault();
     const text = note.trim();
     create.mutate({ note_text: text, display_name: name.trim() || undefined },
-      { onSuccess: (r) => setSubmitted({ runId: r.run_id, note: text, startedAt: Date.now() }) });
+      { onSuccess: (r) => setParams({ run: r.run_id }) });
   };
 
   return (
@@ -44,7 +52,8 @@ export default function TriageDesk() {
               </label>
               <label className="block">
                 <span className="mb-1.5 block text-xs font-semibold text-ink-2">Complaint and vitals</span>
-                <textarea value={note} onChange={(e) => setNote(e.target.value)} rows={8} required disabled={!!submitted}
+                <textarea value={submitted ? submitted.note : note} onChange={(e) => setNote(e.target.value)} rows={8}
+                  required disabled={!!submitted}
                   placeholder={"45yrs M c/o chest pain since morning\nRR 22  PR 118  BP 150/90  T 37.1C"}
                   className="input font-mono" />
               </label>

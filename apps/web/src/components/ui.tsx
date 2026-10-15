@@ -1,6 +1,6 @@
 import { useEffect, useState, type ReactNode } from "react";
-import { Link } from "react-router-dom";
-import { AlertTriangle, ChevronDown, ChevronRight, Flag as FlagIcon, X } from "lucide-react";
+import { Link, useNavigate } from "react-router-dom";
+import { AlertTriangle, ArrowLeft, ChevronDown, ChevronRight, Flag as FlagIcon, X } from "lucide-react";
 import type { Citation, Flag, Priority } from "../api";
 import { useRulesStatus } from "../api";
 
@@ -63,10 +63,25 @@ export function Card({ title, subtitle, children, actions, padded = true }: {
   );
 }
 
-export function PageHeader({ title, subtitle, actions }: { title: string; subtitle?: string; actions?: ReactNode }) {
+/** Back to wherever the user came from; if they arrived directly (no in-app history), go to `fallback`. */
+export function BackButton({ fallback }: { fallback: string }) {
+  const navigate = useNavigate();
+  const canGoBack = ((window.history.state as { idx?: number } | null)?.idx ?? 0) > 0;
+  return (
+    <button onClick={() => (canGoBack ? navigate(-1) : navigate(fallback))}
+      className="mb-2 inline-flex items-center gap-1 text-sm font-semibold text-ink-2 hover:text-brand">
+      <ArrowLeft size={16} /> Back
+    </button>
+  );
+}
+
+export function PageHeader({ title, subtitle, actions, back }: {
+  title: string; subtitle?: string; actions?: ReactNode; back?: string;
+}) {
   return (
     <div className="mb-5 flex flex-wrap items-end justify-between gap-3">
       <div>
+        {back && <div><BackButton fallback={back} /></div>}
         <h1 className="text-xl font-bold">{title}</h1>
         {subtitle && <p className="mt-0.5 text-sm text-ink-2">{subtitle}</p>}
       </div>

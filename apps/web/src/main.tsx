@@ -7,7 +7,8 @@ import { AuthProvider } from "./auth";
 import "./index.css";
 
 const queryClient = new QueryClient({
-  defaultOptions: { queries: { retry: 1, refetchOnWindowFocus: true } },
+  // Cached pages show instantly when you come back; they refresh in the background after 10 s.
+  defaultOptions: { queries: { retry: 1, refetchOnWindowFocus: true, staleTime: 10_000 } },
 });
 
 createRoot(document.getElementById("root")!).render(

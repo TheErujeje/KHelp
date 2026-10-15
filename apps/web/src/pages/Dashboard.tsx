@@ -1,5 +1,4 @@
-import { useState } from "react";
-import { Link, useNavigate } from "react-router-dom";
+import { Link, useNavigate, useSearchParams } from "react-router-dom";
 import { AlertTriangle, ClipboardCheck, Clock, Plus, Users } from "lucide-react";
 import { usePendingFlags, usePendingProposals, useQueue, useScorePatient, type Priority, type QueueRow } from "../api";
 import { FlagReview, ProposalReview } from "../components/Review";
@@ -16,7 +15,12 @@ export default function Dashboard() {
   const queue = useQueue();
   const proposals = usePendingProposals();
   const flags = usePendingFlags();
-  const [review, setReview] = useState<Review>(null);
+  // The open review lives in the URL (?review=p12 or ?review=f5): Back closes it, refresh keeps it.
+  const [params, setParams] = useSearchParams();
+  const raw = params.get("review");
+  const review: Review = raw && /^[pf]\d+$/.test(raw)
+    ? { kind: raw[0] === "p" ? "proposal" : "flag", id: Number(raw.slice(1)) } : null;
+  const setReview = (r: Review) => setParams(r ? { review: `${r.kind === "proposal" ? "p" : "f"}${r.id}` } : {});
 
   const rows = queue.data?.patients ?? [];
   const pendingCount = proposals.data?.proposals.length ?? 0;
@@ -36,7 +40,7 @@ export default function Dashboard() {
         <Stat icon={Users} label="Waiting" value={rows.length} />
         <Stat icon={ClipboardCheck} label="Awaiting approval" value={pendingCount} tone={pendingCount ? "amber" : undefined}
           to="/approvals" />
-        <Stat icon={AlertTriangle} label="Open flags" value={flagCount} tone={flagCount ? "red" : undefined} to="/approvals" />
+        <Stat icon={AlertTriangle} label="Open flags" value={flagCount} tone={flagCount ? "red" : undefined} to="/approvals?tab=flags" />
         <Stat icon={Clock} label="Longest wait" value={rows.length ? waitLabel(longest) : "—"} hint={`${urgent} RED/ORANGE waiting`} />
       </div>
 

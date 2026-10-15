@@ -15,7 +15,7 @@ from fastapi.responses import StreamingResponse
 from sqlalchemy import select
 from sqlalchemy.orm import Session
 
-from khelp_db import AgentRun, AuditLog, Proposal, RecheckFlag, session_factory
+from khelp_db import AgentRun, AuditLog, Intake, Proposal, RecheckFlag, session_factory
 
 from .. import serializers as ser
 from ..deps import get_session
@@ -41,8 +41,10 @@ def get_run(run_id: str, s: Session = Depends(get_session)) -> dict[str, Any]:
     run = s.get(AgentRun, run_id)
     if run is None:
         raise HTTPException(404, "run not found")
+    intake = s.get(Intake, run.intake_id) if run.intake_id else None
     return {
         "run": ser.run(run),
+        "note_text": intake.note_text if intake else None,
         "proposals": [ser.proposal(p) for p in s.scalars(select(Proposal).where(Proposal.run_id == run_id))],
         "flags": [ser.flag(f) for f in s.scalars(select(RecheckFlag).where(RecheckFlag.run_id == run_id))],
     }

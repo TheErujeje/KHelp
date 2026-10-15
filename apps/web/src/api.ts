@@ -155,8 +155,9 @@ export const usePatient = (id: number) =>
   useQuery({ queryKey: ["patient", id], queryFn: () => request<PatientDetail>(`/patients/${id}`),
              refetchInterval: 5000 });
 
-export const useRun = (id: string) =>
-  useQuery({ queryKey: ["run", id], queryFn: () => request<{ run: Run; proposals: Proposal[]; flags: Flag[] }>(`/runs/${id}`) });
+export const useRun = (id: string | null) =>
+  useQuery({ queryKey: ["run", id], enabled: !!id,
+             queryFn: () => request<{ run: Run; note_text: string | null; proposals: Proposal[]; flags: Flag[] }>(`/runs/${id}`) });
 
 export const useRulesStatus = () =>
   useQuery({ queryKey: ["rules"], queryFn: () => request<{ unverified_count: number; total: number; all_verified: boolean }>("/rules/status"),

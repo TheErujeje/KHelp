@@ -21,7 +21,7 @@ function RunView({ runId }: { runId: string }) {
   const run = data?.run;
   return (
     <>
-      <PageHeader title="Assistant run" subtitle={`Every tool call, as recorded in the audit log · run ${runId.slice(0, 8)}`} />
+      <PageHeader title="Assistant run" back="/queue" subtitle={`Every tool call, as recorded in the audit log · run ${runId.slice(0, 8)}`} />
       <div className="grid gap-5 lg:grid-cols-5">
         <div className="lg:col-span-3">
           <Card title="Tool calls" subtitle="Click a row for its exact inputs and outputs."><ToolFeed events={events} state={state} /></Card>
