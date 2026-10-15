@@ -16,12 +16,13 @@ from sqlalchemy import select
 from sqlalchemy.orm import Session
 
 from khelp_db import AgentRun, Approval, AuditLog, Intake, Patient, Proposal, RecheckFlag, VitalsReading
-from khelp_scoring import priority_rank
+from khelp_scoring import load_rules, priority_rank
 
 from .. import serializers as ser
 from ..agent.runner import Settings, write_note_file
 from ..deps import get_session
-from ..schemas import AcknowledgeIn, ApproveIn, IntakeIn, OverrideIn, RecheckIn, SeenIn
+from ..policy import SENIOR_RULE, can_call_in, can_override, can_set_manual_priority
+from ..schemas import AcknowledgeIn, ApproveIn, CallIn, IntakeIn, OverrideIn, RecheckIn, SeenIn
 from ..worker import submit_run
 
 router = APIRouter()
@@ -110,26 +111,51 @@ def _latest_run(s: Session, patient_id: int) -> AgentRun | None:
                      .order_by(AgentRun.started_at.desc()).limit(1)).first()
 
 
+def _decided_proposal(s: Session, patient_id: int) -> Proposal | None:
+    return s.scalars(select(Proposal).where(Proposal.patient_id == patient_id,
+                                            Proposal.status.in_(("APPROVED", "OVERRIDDEN")))
+                     .order_by(Proposal.id.desc()).limit(1)).first()
+
+
+def _queue_row(s: Session, p: Patient) -> dict[str, Any]:
+    pending = s.scalars(select(Proposal).where(Proposal.patient_id == p.id, Proposal.status == "PENDING")
+                        .order_by(Proposal.id.desc()).limit(1)).first()
+    flags = s.scalars(select(RecheckFlag).where(RecheckFlag.patient_id == p.id,
+                                                RecheckFlag.status == "PENDING")).all()
+    run = _latest_run(s, p.id)
+    note = s.scalars(select(Intake.note_text).where(Intake.patient_id == p.id)
+                     .order_by(Intake.id).limit(1)).first()
+    row: dict[str, Any] = {
+        **ser.patient(p),
+        "note_text": note,
+        "pending_proposal": {"id": pending.id, "priority": pending.priority} if pending else None,
+        "pending_flags": [ser.flag(f) for f in flags],
+        "latest_run": {"id": run.id, "status": run.status, "kind": run.kind} if run else None,
+        "decided_proposal": None,
+        "target": None,
+    }
+    decided = _decided_proposal(s, p.id)
+    if decided:
+        row["decided_proposal"] = {"id": decided.id, "proposed": decided.priority, "status": decided.status,
+                                   "rationale": decided.rationale, "citations": decided.citations}
+    if p.approved_priority and p.approved_at:
+        # SATS target time to be seen, counted from triage (manual p.7, Table 3)
+        target = load_rules().target(p.approved_priority)
+        since = int((_now() - p.approved_at).total_seconds() // 60)
+        row["target"] = {"minutes": target["minutes"], "label": target["label"], "since_triage_minutes": since,
+                         "overdue_minutes": max(0, since - target["minutes"]), "source": target["source"]}
+    return row
+
+
 @router.get("/queue")
 def get_queue(s: Session = Depends(get_session)) -> dict[str, Any]:
-    patients = s.scalars(select(Patient).where(Patient.status == "WAITING")).all()
-    rows = []
-    for p in patients:
-        pending = s.scalars(select(Proposal).where(Proposal.patient_id == p.id, Proposal.status == "PENDING")
-                            .order_by(Proposal.id.desc()).limit(1)).first()
-        flags = s.scalars(select(RecheckFlag).where(RecheckFlag.patient_id == p.id,
-                                                    RecheckFlag.status == "PENDING")).all()
-        run = _latest_run(s, p.id)
-        rows.append({
-            **ser.patient(p),
-            "pending_proposal": {"id": pending.id, "priority": pending.priority} if pending else None,
-            "pending_flags": [ser.flag(f) for f in flags],
-            "latest_run": {"id": run.id, "status": run.status, "kind": run.kind} if run else None,
-        })
+    waiting = [_queue_row(s, p) for p in s.scalars(select(Patient).where(Patient.status == "WAITING")).all()]
     # Approved priority first (RED .. GREEN), then patients not yet prioritised; each by arrival.
-    rows.sort(key=lambda r: (-priority_rank(r["approved_priority"]) if r["approved_priority"] else 1,
-                             r["arrived_at"]))
-    return {"patients": rows}
+    waiting.sort(key=lambda r: (-priority_rank(r["approved_priority"]) if r["approved_priority"] else 1,
+                                r["arrived_at"]))
+    in_consult = [_queue_row(s, p) for p in s.scalars(select(Patient).where(Patient.status == "IN_CONSULT")
+                                                       .order_by(Patient.called_at)).all()]
+    return {"patients": waiting, "in_consult": in_consult}
 
 
 @router.get("/patients/{patient_id}")
@@ -152,14 +178,36 @@ def get_patient(patient_id: int, s: Session = Depends(get_session)) -> dict[str,
     }
 
 
+@router.post("/patients/{patient_id}/call")
+def call_in(patient_id: int, body: CallIn, s: Session = Depends(get_session)) -> dict[str, Any]:
+    """A doctor calls the patient into a consulting room. Does not change anyone's priority."""
+    if not can_call_in(body.clinician_role):
+        raise HTTPException(403, "Calling a patient in is for a doctor or senior nurse.")
+    with s.begin():
+        p = s.scalars(select(Patient).where(Patient.id == patient_id).with_for_update()).first()
+        if p is None:
+            raise HTTPException(404, "patient not found")
+        if p.status != "WAITING":
+            raise HTTPException(409, f"patient is {p.status}, not WAITING")
+        if not p.approved_priority:
+            raise HTTPException(409, "patient has not been triaged yet (no approved priority)")
+        p.status, p.called_at, p.called_by = "IN_CONSULT", _now(), body.clinician_name
+        _audit(s, event_type="CALLED_IN", patient_id=p.id, actor=body.clinician_name,
+               inputs={"role": body.clinician_role}, outputs={"status": "IN_CONSULT"})
+    return ser.patient(p)
+
+
 @router.post("/patients/{patient_id}/seen")
 def mark_seen(patient_id: int, body: SeenIn, s: Session = Depends(get_session)) -> dict[str, Any]:
     with s.begin():
         p = s.scalars(select(Patient).where(Patient.id == patient_id).with_for_update()).first()
         if p is None:
             raise HTTPException(404, "patient not found")
+        if p.status not in ("WAITING", "IN_CONSULT"):
+            raise HTTPException(409, f"patient is already {p.status}")
         p.status = "SEEN"
-        _audit(s, event_type="PATIENT_SEEN", patient_id=p.id, actor=body.clinician_name, outputs={"status": "SEEN"})
+        _audit(s, event_type="PATIENT_SEEN", patient_id=p.id, actor=body.clinician_name,
+               inputs={"role": body.clinician_role}, outputs={"status": "SEEN"})
     return ser.patient(p)
 
 
@@ -192,7 +240,7 @@ def _lock_pending(s: Session, proposal_id: int) -> tuple[Proposal, Patient]:
 
 
 def _commit_priority(s: Session, prop: Proposal, patient: Patient, *, status: str, priority: str,
-                     clinician: str, reason: str | None) -> Approval:
+                     clinician: str, role: str, reason: str | None) -> Approval:
     prop.status = status
     patient.approved_priority = priority
     patient.approved_by = clinician
@@ -201,12 +249,12 @@ def _commit_priority(s: Session, prop: Proposal, patient: Patient, *, status: st
                                                   Proposal.id != prop.id)):
         other.status = "SUPERSEDED"
     action = "APPROVE" if status == "APPROVED" else "OVERRIDE"
-    approval = Approval(patient_id=patient.id, proposal_id=prop.id, clinician_name=clinician, action=action,
-                        priority=priority, reason=reason)
+    approval = Approval(patient_id=patient.id, proposal_id=prop.id, clinician_name=clinician,
+                        clinician_role=role, action=action, priority=priority, reason=reason)
     s.add(approval)
     s.flush()
     _audit(s, event_type=action, patient_id=patient.id, actor=clinician, run_id=prop.run_id,
-           inputs={"proposal_id": prop.id, "proposed": prop.priority, "reason": reason},
+           inputs={"proposal_id": prop.id, "proposed": prop.priority, "reason": reason, "role": role},
            outputs={"approved_priority": priority, "approval_id": approval.id})
     return approval
 
@@ -216,7 +264,7 @@ def approve_proposal(proposal_id: int, body: ApproveIn, s: Session = Depends(get
     with s.begin():
         prop, patient = _lock_pending(s, proposal_id)
         approval = _commit_priority(s, prop, patient, status="APPROVED", priority=prop.priority,
-                                    clinician=body.clinician_name, reason=None)
+                                    clinician=body.clinician_name, role=body.clinician_role, reason=None)
     return {"approval": ser.approval(approval), "patient": ser.patient(patient)}
 
 
@@ -224,8 +272,11 @@ def approve_proposal(proposal_id: int, body: ApproveIn, s: Session = Depends(get
 def override_proposal(proposal_id: int, body: OverrideIn, s: Session = Depends(get_session)) -> dict[str, Any]:
     with s.begin():
         prop, patient = _lock_pending(s, proposal_id)
+        if not can_override(body.clinician_role, prop.priority, body.priority):
+            raise HTTPException(403, SENIOR_RULE)
         approval = _commit_priority(s, prop, patient, status="OVERRIDDEN", priority=body.priority,
-                                    clinician=body.clinician_name, reason=body.reason.strip())
+                                    clinician=body.clinician_name, role=body.clinician_role,
+                                    reason=body.reason.strip())
     return {"approval": ser.approval(approval), "patient": ser.patient(patient)}
 
 
@@ -255,15 +306,19 @@ def acknowledge_flag(flag_id: int, body: AcknowledgeIn, s: Session = Depends(get
             if flag.flag_type != "MANUAL_TRIAGE":
                 raise HTTPException(422, "a priority can only be set when acknowledging a MANUAL_TRIAGE flag; "
                                          "use the proposal approve/override endpoints otherwise")
+            if not can_set_manual_priority(body.clinician_role):
+                raise HTTPException(403, SENIOR_RULE)
             patient.approved_priority = body.priority
             patient.approved_by = body.clinician_name
             patient.approved_at = _now()
         flag.status = "ACKNOWLEDGED"
         approval = Approval(patient_id=patient.id, recheck_flag_id=flag.id, clinician_name=body.clinician_name,
-                            action="ACKNOWLEDGE", priority=body.priority, reason=body.note)
+                            clinician_role=body.clinician_role, action="ACKNOWLEDGE", priority=body.priority,
+                            reason=body.note)
         s.add(approval)
         s.flush()
         _audit(s, event_type="ACKNOWLEDGE", patient_id=patient.id, actor=body.clinician_name, run_id=flag.run_id,
-               inputs={"flag_id": flag.id, "flag_type": flag.flag_type, "note": body.note},
+               inputs={"flag_id": flag.id, "flag_type": flag.flag_type, "note": body.note,
+                       "role": body.clinician_role},
                outputs={"approved_priority": patient.approved_priority, "approval_id": approval.id})
     return {"approval": ser.approval(approval), "patient": ser.patient(patient), "flag": ser.flag(flag)}

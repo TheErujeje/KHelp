@@ -5,6 +5,7 @@ from typing import Literal
 from pydantic import BaseModel, Field, field_validator
 
 Priority = Literal["GREEN", "YELLOW", "ORANGE", "RED"]
+Role = Literal["TRIAGE_NURSE", "DOCTOR", "SENIOR_NURSE"]
 
 
 def _named(value: str) -> str:
@@ -25,11 +26,13 @@ class RecheckIn(BaseModel):
 
 class ApproveIn(BaseModel):
     clinician_name: str = Field(max_length=120)
+    clinician_role: Role
     _check_name = field_validator("clinician_name")(_named)
 
 
 class OverrideIn(BaseModel):
     clinician_name: str = Field(max_length=120)
+    clinician_role: Role
     priority: Priority
     reason: str = Field(min_length=3, max_length=1000)
     _check_name = field_validator("clinician_name")(_named)
@@ -37,6 +40,7 @@ class OverrideIn(BaseModel):
 
 class AcknowledgeIn(BaseModel):
     clinician_name: str = Field(max_length=120)
+    clinician_role: Role
     note: str | None = Field(default=None, max_length=1000)
     # Only for MANUAL_TRIAGE flags: the clinician's own priority for the patient.
     priority: Priority | None = None
@@ -45,4 +49,9 @@ class AcknowledgeIn(BaseModel):
 
 class SeenIn(BaseModel):
     clinician_name: str = Field(max_length=120)
+    clinician_role: Role
     _check_name = field_validator("clinician_name")(_named)
+
+
+class CallIn(SeenIn):
+    pass

@@ -29,7 +29,7 @@ export default function Dashboard() {
 
   return (
     <>
-      <PageHeader title="Dashboard" subtitle="Waiting patients, ordered by approved priority, then arrival."
+      <PageHeader title="Queue" subtitle="Everyone waiting, ordered by approved priority, then arrival."
         actions={<Link to="/triage" className="btn-primary"><Plus size={16} /> New patient</Link>} />
 
       <div className="mb-5 grid grid-cols-2 gap-3 lg:grid-cols-4">

@@ -37,6 +37,10 @@ class RuleSet:
     def min_age_years(self) -> int:
         return self.tews["applies_to"]["min_age_years"]
 
+    def target(self, priority: str) -> dict[str, Any]:
+        """SATS target time to be seen for a priority (manual p.7, Table 3)."""
+        return next(t for t in self.priority_rules["target_minutes"] if t["priority"] == priority)
+
     def discriminator(self, disc_id: str) -> dict[str, Any] | None:
         for entry in self.discriminators["discriminators"]:
             if entry["id"] == disc_id:
@@ -50,6 +54,7 @@ class RuleSet:
             entries.extend(param["bands"])
         entries.extend(self.discriminators["discriminators"])
         entries.extend(self.priority_rules["tews_to_priority"])
+        entries.extend(self.priority_rules.get("target_minutes", []))
         entries.append(self.priority_rules["missing_inputs"])
         return entries
 

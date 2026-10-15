@@ -13,7 +13,7 @@ export default function Approvals() {
 
   return (
     <>
-      <PageHeader title="Approvals" subtitle="Nothing moves in the queue until it is approved here or from the dashboard." />
+      <PageHeader title="Approvals" subtitle="Nothing moves in the queue until it is approved here or from the queue." />
       <div className="mb-4 inline-flex rounded-lg bg-slate-200/60 p-1">
         {([["proposals", `Priority proposals (${pList.length})`], ["flags", `Re-check flags (${fList.length})`]] as const).map(([k, label]) => (
           <button key={k} onClick={() => setTab(k)}

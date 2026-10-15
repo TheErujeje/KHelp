@@ -3,7 +3,8 @@ import { Check, ChevronDown, ChevronRight, PenLine } from "lucide-react";
 import {
   PRIORITIES, useAcknowledge, useApprove, useOverride, type Flag, type Priority, type Proposal,
 } from "../api";
-import { useClinician } from "../auth";
+import { ROLE_CODE, isSenior, useClinician } from "../auth";
+import { priorityRank } from "../lib";
 import { CitationList, ErrorText, FlagChip, PriorityBadge, WhySummary } from "./ui";
 
 const QUICK_REASONS = [
@@ -60,7 +61,8 @@ export function ProposalReview({ proposal, noteText, onDone }: {
         <div className="space-y-3 border-t border-line pt-4">
           <div className="flex flex-wrap items-center gap-2">
             <button className="btn-primary px-5 py-2.5" disabled={approve.isPending}
-              onClick={() => approve.mutate({ id: proposal.id, clinician_name: me.name }, { onSuccess: onDone })}>
+              onClick={() => approve.mutate({ id: proposal.id, clinician_name: me.name, clinician_role: ROLE_CODE[me.role] },
+                { onSuccess: onDone })}>
               <Check size={16} /> Approve {proposal.priority}
             </button>
             <button className="btn-secondary py-2.5" onClick={() => setOverriding(!overriding)}>
@@ -73,19 +75,31 @@ export function ProposalReview({ proposal, noteText, onDone }: {
             <form className="space-y-3 rounded-lg border border-line bg-white p-4" onSubmit={(e) => {
               e.preventDefault();
               if (!newPriority) return;
-              override.mutate({ id: proposal.id, clinician_name: me.name, priority: newPriority, reason: reason.trim() },
-                { onSuccess: onDone });
+              override.mutate({ id: proposal.id, clinician_name: me.name, clinician_role: ROLE_CODE[me.role],
+                                priority: newPriority, reason: reason.trim() }, { onSuccess: onDone });
             }}>
               <div>
                 <div className="mb-1.5 text-xs font-semibold text-ink-2">New priority</div>
                 <div className="flex flex-wrap gap-2">
-                  {PRIORITIES.map((p) => (
-                    <button type="button" key={p} onClick={() => setNewPriority(p)}
-                      className={`rounded-lg p-1 ring-2 transition ${newPriority === p ? "ring-ink" : "ring-transparent hover:ring-line"}`}>
-                      <PriorityBadge priority={p} size="lg" />
-                    </button>
-                  ))}
+                  {PRIORITIES.map((p) => {
+                    const lower = priorityRank(p) < priorityRank(proposal.priority);
+                    const blocked = lower && !isSenior(me.role);
+                    return (
+                      <button type="button" key={p} disabled={blocked} onClick={() => setNewPriority(p)}
+                        title={blocked ? "Lowering needs a doctor or senior nurse" : undefined}
+                        className={`rounded-lg p-1 ring-2 transition disabled:cursor-not-allowed disabled:opacity-30 ${
+                          newPriority === p ? "ring-ink" : "ring-transparent hover:ring-line"}`}>
+                        <PriorityBadge priority={p} size="lg" />
+                      </button>
+                    );
+                  })}
                 </div>
+                {!isSenior(me.role) && (
+                  <p className="mt-1.5 text-xs text-ink-3">
+                    You can raise the priority. Lowering it below the SATS result needs a doctor or senior nurse
+                    (SATS manual p.6, senior healthcare professional's discretion).
+                  </p>
+                )}
               </div>
               <div>
                 <div className="mb-1.5 text-xs font-semibold text-ink-2">Reason (required)</div>
@@ -118,6 +132,7 @@ export function FlagReview({ flag, onDone }: { flag: Flag; onDone?: () => void }
   const [note, setNote] = useState("");
   const [priority, setPriority] = useState<Priority | null>(null);
   const manual = flag.flag_type === "MANUAL_TRIAGE";
+  const canSetPriority = manual && isSenior(me.role);
   const d = flag.details as { previous_tews?: { min: number; max: number }; new_tews?: { min: number; max: number };
     definitely_worse?: boolean; outstanding_inputs?: string[] };
 
@@ -137,10 +152,17 @@ export function FlagReview({ flag, onDone }: { flag: Flag; onDone?: () => void }
       {flag.status === "PENDING" && (
         <form className="space-y-3 border-t border-line pt-3" onSubmit={(e) => {
           e.preventDefault();
-          ack.mutate({ id: flag.id, clinician_name: me.name, note: note.trim() || undefined,
-                       priority: manual && priority ? priority : undefined }, { onSuccess: onDone });
+          ack.mutate({ id: flag.id, clinician_name: me.name, clinician_role: ROLE_CODE[me.role],
+                       note: note.trim() || undefined,
+                       priority: canSetPriority && priority ? priority : undefined }, { onSuccess: onDone });
         }}>
-          {manual && (
+          {manual && !canSetPriority && (
+            <p className="rounded-lg bg-amber-50 p-3 text-sm text-amber-900">
+              This patient is outside the adult scale (child, or no age recorded). Hand over to a doctor or senior
+              nurse to set the priority.
+            </p>
+          )}
+          {canSetPriority && (
             <div>
               <div className="mb-1.5 text-xs font-semibold text-ink-2">Your priority for this patient</div>
               <div className="flex flex-wrap gap-2">
@@ -154,9 +176,11 @@ export function FlagReview({ flag, onDone }: { flag: Flag; onDone?: () => void }
             </div>
           )}
           <input value={note} onChange={(e) => setNote(e.target.value)} placeholder="Note (optional)" className="input" />
-          <button className="btn-primary" disabled={ack.isPending || (manual && !priority)}>
-            <Check size={16} /> {manual ? `Set ${priority ?? "priority"} and close flag` : "Acknowledge"}
-          </button>
+          {(!manual || canSetPriority) && (
+            <button className="btn-primary" disabled={ack.isPending || (canSetPriority && !priority)}>
+              <Check size={16} /> {canSetPriority ? `Set ${priority ?? "priority"} and close flag` : "Acknowledge"}
+            </button>
+          )}
           <ErrorText error={ack.error} />
         </form>
       )}

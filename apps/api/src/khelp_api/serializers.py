@@ -19,7 +19,8 @@ def patient(p: Patient) -> dict[str, Any]:
         "id": p.id, "display_name": p.display_name, "age_years": p.age_years, "sex": p.sex,
         "arrived_at": _ts(p.arrived_at), "wait_minutes": wait_minutes(p), "status": p.status,
         "approved_priority": p.approved_priority, "approved_by": p.approved_by,
-        "approved_at": _ts(p.approved_at), "is_synthetic": p.is_synthetic,
+        "approved_at": _ts(p.approved_at), "called_at": _ts(p.called_at), "called_by": p.called_by,
+        "is_synthetic": p.is_synthetic,
     }
 
 
@@ -43,7 +44,7 @@ def flag(f: RecheckFlag) -> dict[str, Any]:
 
 def approval(a: Approval) -> dict[str, Any]:
     return {"id": a.id, "patient_id": a.patient_id, "proposal_id": a.proposal_id,
-            "recheck_flag_id": a.recheck_flag_id, "clinician_name": a.clinician_name, "action": a.action,
+            "recheck_flag_id": a.recheck_flag_id, "clinician_name": a.clinician_name, "clinician_role": a.clinician_role, "action": a.action,
             "priority": a.priority, "reason": a.reason, "created_at": _ts(a.created_at)}
 
 

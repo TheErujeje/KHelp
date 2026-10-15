@@ -18,6 +18,15 @@ tews_to_priority:
   - { id: prio.tews.orange, min: 5, max: 6,    priority: ORANGE, source: *flow, verified: true }
   - { id: prio.tews.red,    min: 7, max: null, priority: RED,    source: *flow, verified: true }
 
+# Target time to be seen, from the moment of triage. Manual p.7, Table 3 "SATS priority levels
+# and target times to be seen within".
+_targets: &targets { document: SATS Training Manual, edition: "2012 (Western Cape Government Health)", location: "p.7, Table 3: SATS priority levels and target times" }
+target_minutes:
+  - { id: prio.target.red,    priority: RED,    minutes: 0,   label: Immediate,  source: *targets, verified: true }
+  - { id: prio.target.orange, priority: ORANGE, minutes: 10,  label: "< 10 mins", source: *targets, verified: true }
+  - { id: prio.target.yellow, priority: YELLOW, minutes: 60,  label: "< 1 hour",  source: *targets, verified: true }
+  - { id: prio.target.green,  priority: GREEN,  minutes: 240, label: "< 4 hours", source: *targets, verified: true }
+
 # Klaudesk project rule, NOT part of SATS: how missing or implausible TEWS inputs are handled.
 # Each missing input is bounded by its lowest and highest points. If the priority is the same at
 # both bounds it is proposed; if the lower bound is already at or above

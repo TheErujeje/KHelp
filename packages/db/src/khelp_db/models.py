@@ -47,7 +47,7 @@ def created_at() -> Mapped[datetime]:
 class Patient(Base):
     __tablename__ = "patients"
     __table_args__ = (
-        CheckConstraint(_in("status", ("WAITING", "SEEN", "LEFT")), name="patients_status"),
+        CheckConstraint(_in("status", ("WAITING", "IN_CONSULT", "SEEN", "LEFT")), name="patients_status"),
         CheckConstraint(f"approved_priority IS NULL OR {_in('approved_priority', PRIORITIES)}",
                         name="patients_approved_priority"),
     )
@@ -62,6 +62,8 @@ class Patient(Base):
     approved_priority: Mapped[str | None] = mapped_column(String(8))
     approved_at: Mapped[datetime | None] = mapped_column(DateTime(timezone=True))
     approved_by: Mapped[str | None] = mapped_column(String(120))
+    called_at: Mapped[datetime | None] = mapped_column(DateTime(timezone=True))
+    called_by: Mapped[str | None] = mapped_column(String(120))
     is_synthetic: Mapped[bool] = mapped_column(Boolean, default=True, server_default="true")
 
 
@@ -168,6 +170,7 @@ class Approval(Base):
     proposal_id: Mapped[int | None] = mapped_column(ForeignKey("proposals.id"))
     recheck_flag_id: Mapped[int | None] = mapped_column(ForeignKey("recheck_flags.id"))
     clinician_name: Mapped[str] = mapped_column(String(120))
+    clinician_role: Mapped[str | None] = mapped_column(String(16))
     action: Mapped[str] = mapped_column(String(16))
     priority: Mapped[str | None] = mapped_column(String(8))
     reason: Mapped[str | None] = mapped_column(Text)

@@ -1,6 +1,6 @@
 import { useState } from "react";
 import { NavLink, Outlet } from "react-router-dom";
-import { ClipboardCheck, LayoutDashboard, LogOut, Menu, ScrollText, Stethoscope, UserPlus, X } from "lucide-react";
+import { ClipboardCheck, DoorOpen, LayoutDashboard, LogOut, Menu, ScrollText, Stethoscope, UserPlus, X } from "lucide-react";
 import { useHealth, usePendingFlags, usePendingProposals } from "../api";
 import { useAuth } from "../auth";
 import { RulesBanner } from "./ui";
@@ -12,12 +12,14 @@ function Sidebar({ onNavigate }: { onNavigate?: () => void }) {
   const health = useHealth();
   const pending = (proposals.data?.proposals.length ?? 0) + (flags.data?.flags.length ?? 0);
 
-  const nav = [
-    { to: "/", label: "Dashboard", icon: LayoutDashboard, end: true },
-    { to: "/triage", label: "Triage desk", icon: UserPlus },
-    { to: "/approvals", label: "Approvals", icon: ClipboardCheck, badge: pending },
-    { to: "/audit", label: "Audit log", icon: ScrollText },
-  ];
+  const triage = { to: "/triage", label: "Triage desk", icon: UserPlus };
+  const next = { to: "/next", label: "Next up", icon: DoorOpen };
+  const queue = { to: "/queue", label: "Queue", icon: LayoutDashboard };
+  const approvals = { to: "/approvals", label: "Approvals", icon: ClipboardCheck, badge: pending };
+  const audit = { to: "/audit", label: "Audit log", icon: ScrollText };
+  // Each role sees its own work first; every page stays reachable.
+  const nav: { to: string; label: string; icon: typeof UserPlus; badge?: number; end?: boolean }[] =
+    user?.role === "Triage nurse" ? [triage, queue, approvals, next, audit] : [next, queue, approvals, triage, audit];
 
   return (
     <div className="flex h-full w-64 flex-col bg-sidebar-bg">

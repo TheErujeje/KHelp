@@ -7,6 +7,8 @@ export const PRIORITIES: Priority[] = ["RED", "ORANGE", "YELLOW", "GREEN"];
 
 export interface Source { document: string; edition: string; location: string }
 
+export type RoleCode = "TRIAGE_NURSE" | "DOCTOR" | "SENIOR_NURSE";
+
 export interface Patient {
   id: number;
   display_name: string;
@@ -17,6 +19,8 @@ export interface Patient {
   approved_priority: Priority | null;
   approved_by: string | null;
   approved_at: string | null;
+  called_at: string | null;
+  called_by: string | null;
   is_synthetic: boolean;
 }
 
@@ -32,9 +36,12 @@ export interface Flag {
 }
 
 export interface QueueRow extends Patient {
+  note_text: string | null;
   pending_proposal: { id: number; priority: Priority } | null;
   pending_flags: Flag[];
   latest_run: { id: string; status: string; kind: string } | null;
+  decided_proposal: { id: number; proposed: Priority; status: string; rationale: string; citations: Citation[] } | null;
+  target: { minutes: number; label: string; since_triage_minutes: number; overdue_minutes: number; source: Source } | null;
 }
 
 export type Citation =
@@ -101,7 +108,7 @@ export interface PatientDetail {
   vitals: { id: number; raw: Record<string, unknown>; tews_total: number | null; tews_min: number; tews_max: number; created_at: string }[];
   proposals: Proposal[];
   flags: Flag[];
-  approvals: { id: number; clinician_name: string; action: string; priority: Priority | null; reason: string | null; created_at: string }[];
+  approvals: { id: number; clinician_name: string; clinician_role: RoleCode | null; action: string; priority: Priority | null; reason: string | null; created_at: string }[];
   runs: Run[];
 }
 
@@ -132,7 +139,7 @@ const post = <T>(path: string, body: unknown) => request<T>(path, { method: "POS
 // ---------------------------------------------------------------- queries
 
 export const useQueue = () =>
-  useQuery({ queryKey: ["queue"], queryFn: () => request<{ patients: QueueRow[] }>("/queue"),
+  useQuery({ queryKey: ["queue"], queryFn: () => request<{ patients: QueueRow[]; in_consult: QueueRow[] }>("/queue"),
              refetchInterval: 5000 });
 
 export const usePendingProposals = () =>
@@ -197,8 +204,8 @@ export function useCreateRecheck(patientId: number) {
 export function useApprove() {
   const invalidate = useInvalidateAll();
   return useMutation({
-    mutationFn: ({ id, clinician_name }: { id: number; clinician_name: string }) =>
-      post(`/proposals/${id}/approve`, { clinician_name }),
+    mutationFn: ({ id, ...body }: { id: number; clinician_name: string; clinician_role: RoleCode }) =>
+      post(`/proposals/${id}/approve`, body),
     onSuccess: invalidate,
   });
 }
@@ -206,7 +213,7 @@ export function useApprove() {
 export function useOverride() {
   const invalidate = useInvalidateAll();
   return useMutation({
-    mutationFn: ({ id, ...body }: { id: number; clinician_name: string; priority: Priority; reason: string }) =>
+    mutationFn: ({ id, ...body }: { id: number; clinician_name: string; clinician_role: RoleCode; priority: Priority; reason: string }) =>
       post(`/proposals/${id}/override`, body),
     onSuccess: invalidate,
   });
@@ -215,7 +222,7 @@ export function useOverride() {
 export function useAcknowledge() {
   const invalidate = useInvalidateAll();
   return useMutation({
-    mutationFn: ({ id, ...body }: { id: number; clinician_name: string; note?: string; priority?: Priority }) =>
+    mutationFn: ({ id, ...body }: { id: number; clinician_name: string; clinician_role: RoleCode; note?: string; priority?: Priority }) =>
       post(`/flags/${id}/acknowledge`, body),
     onSuccess: invalidate,
   });
@@ -232,8 +239,17 @@ export function useScorePatient() {
 export function useMarkSeen() {
   const invalidate = useInvalidateAll();
   return useMutation({
-    mutationFn: ({ id, clinician_name }: { id: number; clinician_name: string }) =>
-      post(`/patients/${id}/seen`, { clinician_name }),
+    mutationFn: ({ id, ...body }: { id: number; clinician_name: string; clinician_role: RoleCode }) =>
+      post(`/patients/${id}/seen`, body),
+    onSuccess: invalidate,
+  });
+}
+
+export function useCallIn() {
+  const invalidate = useInvalidateAll();
+  return useMutation({
+    mutationFn: ({ id, ...body }: { id: number; clinician_name: string; clinician_role: RoleCode }) =>
+      post(`/patients/${id}/call`, body),
     onSuccess: invalidate,
   });
 }

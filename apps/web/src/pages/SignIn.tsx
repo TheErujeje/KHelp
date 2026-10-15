@@ -1,7 +1,7 @@
 import { useState } from "react";
 import { useLocation, useNavigate } from "react-router-dom";
 import { Activity, BadgeCheck, FileSearch, ShieldCheck, Stethoscope } from "lucide-react";
-import { ROLES, useAuth, type Role } from "../auth";
+import { HOME, ROLES, useAuth, type Role } from "../auth";
 
 const POINTS = [
   { icon: Activity, title: "Scores with SATS", text: "TEWS and emergency signs from the vitals and complaint you already wrote." },
@@ -12,7 +12,7 @@ const POINTS = [
 export default function SignIn() {
   const { signIn } = useAuth();
   const navigate = useNavigate();
-  const from = (useLocation().state as { from?: string } | null)?.from ?? "/";
+  const from = (useLocation().state as { from?: string } | null)?.from;
   const [name, setName] = useState("");
   const [role, setRole] = useState<Role>("Triage nurse");
   const [staffId, setStaffId] = useState("");
@@ -23,7 +23,7 @@ export default function SignIn() {
     e.preventDefault();
     if (!valid) return;
     signIn(name, role);
-    navigate(from, { replace: true });
+    navigate(from && from !== "/" ? from : HOME[role], { replace: true });
   };
 
   return (

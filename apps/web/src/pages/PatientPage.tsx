@@ -2,7 +2,7 @@ import { useState } from "react";
 import { Link, useNavigate, useParams } from "react-router-dom";
 import { Activity, CheckCircle2 } from "lucide-react";
 import { useCreateRecheck, useMarkSeen, usePatient } from "../api";
-import { useClinician } from "../auth";
+import { ROLE_CODE, useClinician } from "../auth";
 import { FlagReview, ProposalReview } from "../components/Review";
 import { Card, ErrorText, FlagChip, PageHeader, PriorityBadge } from "../components/ui";
 import { waitLabel } from "../lib";
@@ -19,7 +19,7 @@ export default function PatientPage() {
   if (error) return <ErrorText error={error} />;
   if (!data) return <p className="text-sm text-ink-3">Loading…</p>;
   const p = data.patient;
-  const waiting = p.status === "WAITING";
+  const waiting = p.status === "WAITING" || p.status === "IN_CONSULT";
   const pending = data.proposals.filter((x) => x.status === "PENDING");
   const openFlags = data.flags.filter((f) => f.status === "PENDING");
 
@@ -28,7 +28,7 @@ export default function PatientPage() {
       <PageHeader title={p.display_name}
         subtitle={`${p.is_synthetic ? "Synthetic patient · " : ""}${p.status.toLowerCase()} · waiting ${waitLabel(p.wait_minutes)}`}
         actions={waiting && (
-          <button className="btn-secondary" disabled={seen.isPending} onClick={() => seen.mutate({ id, clinician_name: me.name })}>
+          <button className="btn-secondary" disabled={seen.isPending} onClick={() => seen.mutate({ id, clinician_name: me.name, clinician_role: ROLE_CODE[me.role] })}>
             <CheckCircle2 size={16} /> Mark seen</button>
         )} />
       <ErrorText error={seen.error} />
@@ -80,7 +80,7 @@ export default function PatientPage() {
             <ul className="space-y-3 text-sm">
               {data.approvals.map((a) => (
                 <li key={`a${a.id}`}>
-                  <b>{a.clinician_name}</b> {a.action === "APPROVE" ? "approved" : a.action === "OVERRIDE" ? "overrode to" : "acknowledged"}
+                  <b>{a.clinician_name}</b>{a.clinician_role && <span className="text-ink-3"> ({a.clinician_role.replace("_", " ").toLowerCase()})</span>} {a.action === "APPROVE" ? "approved" : a.action === "OVERRIDE" ? "overrode to" : "acknowledged"}
                   {a.priority && <> <PriorityBadge priority={a.priority} size="sm" /></>}
                   {a.reason && <div className="text-ink-2">“{a.reason}”</div>}
                   <div className="text-[11px] text-ink-3">{new Date(a.created_at).toLocaleString()}</div>

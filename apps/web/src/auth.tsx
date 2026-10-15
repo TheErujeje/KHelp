@@ -5,10 +5,22 @@
 import { createContext, useContext, useState, type ReactNode } from "react";
 import { Navigate, useLocation } from "react-router-dom";
 
-export type Role = "Triage nurse" | "Doctor" | "Clinical officer";
-export const ROLES: Role[] = ["Triage nurse", "Doctor", "Clinical officer"];
+export type Role = "Triage nurse" | "Doctor" | "Senior nurse";
+export const ROLES: Role[] = ["Triage nurse", "Doctor", "Senior nurse"];
+export type RoleCode = "TRIAGE_NURSE" | "DOCTOR" | "SENIOR_NURSE";
+export const ROLE_CODE: Record<Role, RoleCode> = {
+  "Triage nurse": "TRIAGE_NURSE", Doctor: "DOCTOR", "Senior nurse": "SENIOR_NURSE",
+};
+/** SATS p.6: lowering a priority or setting a manual-triage priority is a senior decision. */
+export const isSenior = (role: Role) => role === "Doctor" || role === "Senior nurse";
+/** Where each role starts after sign-in. */
+export const HOME: Record<Role, string> = { "Triage nurse": "/triage", Doctor: "/next", "Senior nurse": "/next" };
 
 export interface Clinician { name: string; role: Role; signedInAt: string }
+
+function validRole(value: unknown): value is Role {
+  return typeof value === "string" && (ROLES as string[]).includes(value);
+}
 
 interface AuthValue {
   user: Clinician | null;
@@ -22,7 +34,8 @@ const AuthContext = createContext<AuthValue | null>(null);
 function readSession(): Clinician | null {
   try {
     const raw = sessionStorage.getItem(KEY);
-    return raw ? (JSON.parse(raw) as Clinician) : null;
+    const parsed = raw ? (JSON.parse(raw) as Clinician) : null;
+    return parsed && validRole(parsed.role) ? parsed : null;  // old sessions with retired roles sign in again
   } catch {
     return null;
   }
