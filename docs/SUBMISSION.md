@@ -32,4 +32,4 @@ On 15 synthetic cases run three times each, the agent chose the right action in 
 three fixes the evals uncovered, at about 8 s and $0.003 per patient. Every tool call and decision
 is audited.
 
-Live demo: https://klaudesk.klaudverse.com · Code: https://github.com/TheErujeje/KHelp
+Live demo: https://klaudesk.klaudverse.com · Code: https://github.com/TheErujeje/Klaudesk

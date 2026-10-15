@@ -58,8 +58,8 @@ You need **Docker** (with Compose v2) and **Git**. Everything else (Postgres, th
 MCP servers, the web UI) runs in containers.
 
 ```bash
-git clone https://github.com/TheErujeje/KHelp.git
-cd KHelp
+git clone https://github.com/TheErujeje/Klaudesk.git
+cd Klaudesk
 cp .env.example .env
 ```
 

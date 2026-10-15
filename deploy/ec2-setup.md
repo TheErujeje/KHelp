@@ -108,7 +108,7 @@ echo '/swapfile none swap sw 0 0' | sudo tee -a /etc/fstab
 ## 3. Configure and start
 
 ```bash
-git clone https://github.com/TheErujeje/KHelp.git && cd KHelp
+git clone https://github.com/TheErujeje/Klaudesk.git && cd Klaudesk
 cp .env.example .env
 sed -i "s/^POSTGRES_PASSWORD=.*/POSTGRES_PASSWORD=$(openssl rand -hex 16)/" .env
 sed -i "s/^MCP_DB_PASSWORD=.*/MCP_DB_PASSWORD=$(openssl rand -hex 16)/" .env
