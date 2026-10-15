@@ -32,7 +32,8 @@ The live demo runs the open-weights model `gpt-oss-120b`; see [Where the model r
 
 ## What a nurse told us
 
-We showed Klaudesk to a nurse who has worked in a fully digitalised clinic. Lightly edited for length:
+We showed Klaudesk to a Registered Nurse at a private clinic in Lagos, who has worked in a fully
+digitalised clinic. Lightly edited for length:
 
 > "The queuing system was just a normal queue: you register in the queue and it keeps passing you.
 > … If it is a real emergency (bleeding, visibly injured, respiratory distress) it has to be evident;

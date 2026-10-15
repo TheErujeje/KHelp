@@ -3,7 +3,7 @@
 > "I worked in a clinic where everything was digitalised … but the queuing system was just a normal
 > queue: you register in the queue and it keeps passing you. … Someone with less visible symptoms
 > will go before me … even though my problem is more severe."
-> <br>— Nurse <!-- ROLE / FACILITY TYPE, e.g. "Registered nurse, private clinic, Lagos" -->
+> <br>— Registered Nurse, Private Clinic, Lagos
 
 Klaudesk fixes that at the triage desk. The nurse types the complaint and vitals the way they write
 the case card, abbreviations and Nigerian Pidgin included ("c/o", "DIB", "belle dey pain me"). An
