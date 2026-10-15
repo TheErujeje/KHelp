@@ -30,6 +30,27 @@ The **Queue** page has the whole waiting room with a **Score** button for the se
 patients, and the **Audit log** shows every tool call and every decision with who made it.
 The live demo runs the open-weights model `gpt-oss-120b`; see [Where the model runs](#where-the-model-runs).
 
+## What a nurse told us
+
+We showed Klaudesk to a nurse who has worked in a fully digitalised clinic. Lightly edited for length:
+
+> "The queuing system was just a normal queue: you register in the queue and it keeps passing you.
+> … If it is a real emergency (bleeding, visibly injured, respiratory distress) it has to be evident;
+> that's when they give you emergency care, and then you are put on a bed, which is still your queue.
+> … Someone with less visible symptoms will go before me … even though my problem is more severe."
+
+> "This is a good solution. If our triage system was working, this would help to group the patients
+> into triage rooms, and if there are enough doctors, they can attend to different patients in
+> different triage groups."
+
+> "It's good that the AI can triage for you, but it's also great that your medical knowledge is
+> needed to approve the priority level, because in medicine there is objective and subjective."
+
+That last point is the design: the deterministic SATS scoring is the objective part, and the named
+nurse or doctor who approves, raises or (if senior) lowers the priority is the subjective part.
+The "triage rooms" idea is our next step: let each doctor's **Next up** board follow one priority
+group, so patients are streamed by urgency rather than by who arrived first.
+
 ## Run it yourself
 
 You need **Docker** (with Compose v2) and **Git**. Everything else (Postgres, the API, the agent, both
